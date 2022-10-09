@@ -6,6 +6,11 @@
 #include "lv_common.h"
 #include <stdio.h>
 
+
+#include "esp_log.h"
+#define TAG "main_page"
+
+
 LV_IMG_DECLARE(logo_setting);
 LV_IMG_DECLARE(logo_fan);
 LV_IMG_DECLARE(logo_ac);
@@ -102,7 +107,7 @@ static void btn_fan_cb(lv_event_t *e){
     if(code == LV_EVENT_CLICKED) {
         //led_blink(PIN_LED);
         // anim_mainpage_out(0);
-        printf("fan click\n");
+        ESP_LOGI(TAG, "enter fan page");
         remove_main_page_obj();
         show_fan_page();
         // anim_mainpage_in(0);
@@ -113,8 +118,8 @@ static void btn_ac_cb(lv_event_t *e){
     if(code == LV_EVENT_CLICKED) {
         //led_blink(PIN_LED);
         // anim_mainpage_out(0);
+        ESP_LOGI(TAG, "enter ac page");
         remove_main_page_obj();
-        printf("ac click\n");
         show_ac_page();
     }
 }
@@ -123,7 +128,7 @@ static void btn_setting_cb(lv_event_t *e){
     if(code == LV_EVENT_CLICKED) {
         //led_blink(PIN_LED);
         // anim_mainpage_out(0);
-        printf("setting click\n");
+        ESP_LOGI(TAG, "enter setting page");
         remove_main_page_obj();
         show_setting_page();
     }
@@ -135,7 +140,7 @@ static void astronaut_anim(void){
     lv_obj_t *animing_astronaut = lv_animimg_create(astronaut);
     lv_obj_center(animing_astronaut);
     lv_animimg_set_src(animing_astronaut,  (lv_img_dsc_t**)astronaut_imgs, 7);
-    lv_animimg_set_duration(animing_astronaut, 600);
+    lv_animimg_set_duration(animing_astronaut, 300);
     lv_animimg_set_repeat_count(animing_astronaut, LV_ANIM_REPEAT_INFINITE);
     lv_animimg_start(animing_astronaut);
 }
@@ -185,50 +190,34 @@ void create_main_page_btn(void){
     btn_ac = lv_img_create(bg_screen);
     lv_obj_add_style(btn_ac, &style_btn_pressed, LV_STATE_PRESSED);
     lv_obj_add_style(btn_ac, &style_outline_focused, LV_STATE_FOCUSED);
-    // lv_obj_set_style_transform_zoom(btn_ac, 230, 0);
     lv_obj_add_flag(btn_ac, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(btn_ac, btn_ac_cb, LV_EVENT_CLICKED, NULL);
     lv_img_set_src(btn_ac, &logo_ac);
     lv_obj_align(btn_ac, LV_ALIGN_BOTTOM_MID, 0,-70);
-    // lv_obj_align_to(btn_ac, btn_setting, LV_ALIGN_CENTER, -70, 0);
-    // lv_obj_align(btn_ac, LV_ALIGN_BOTTOM_MID, -50,-70);
 
     /* 设置按键 */
     btn_setting = lv_img_create(bg_screen);
     lv_obj_add_style(btn_setting, &style_btn_pressed, LV_STATE_PRESSED);
     lv_obj_add_style(btn_setting, &style_outline_focused, LV_STATE_FOCUSED);
-    // lv_obj_set_style_transform_zoom(btn_setting, 220, 0);
     lv_obj_add_flag(btn_setting, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(btn_setting, btn_setting_cb, LV_EVENT_CLICKED, NULL);
     lv_img_set_src(btn_setting, &logo_setting);
-    // lv_obj_align(btn_setting, LV_ALIGN_BOTTOM_MID, 0,-70);
     lv_obj_align_to(btn_setting, btn_ac, LV_ALIGN_CENTER, -70, 0);
 
     /* 风扇按键 */
     btn_fan = lv_img_create(bg_screen);
     lv_obj_add_style(btn_fan, &style_btn_pressed, LV_STATE_PRESSED);
     lv_obj_add_style(btn_fan, &style_outline_focused, LV_STATE_FOCUSED);
-    lv_obj_set_style_transform_zoom(btn_fan, 220, 0);
     lv_obj_add_flag(btn_fan, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(btn_fan, btn_fan_cb, LV_EVENT_CLICKED, NULL);
     lv_img_set_src(btn_fan, &logo_fan);
     lv_obj_align_to(btn_fan, btn_ac, LV_ALIGN_CENTER, 70, 0);
-    // lv_obj_align(btn_fan, LV_ALIGN_BOTTOM_MID, 50, -70);
-
-    
-
 }
 
 
-// void show_main_page(void){
-//     bg_page();
-//     // lv_init_btn_style();
-//     // create_main_page_btn();
-//     gif_astronaut();        //太空人动图
-// }
-
 void show_main_page(void){
-    lv_obj_t * hellotext = lv_label_create(lv_scr_act());
-    lv_label_set_text(hellotext, "12345");
-    lv_obj_center(hellotext);
+    // bg_page();
+    lv_init_btn_style();
+    create_main_page_btn();
+    gif_astronaut();        //太空人动图
 }

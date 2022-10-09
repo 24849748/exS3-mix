@@ -1,33 +1,47 @@
 #include "lv_task.h"
 
+// #include <stdbool.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <string.h>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
+#include "freertos/queue.h"
+
 #include "esp_freertos_hooks.h"
+#include "esp_timer.h"
+#include "esp_system.h"
+#include "esp_log.h"
+
 #include "lvgl.h"
 #include "lv_port_disp.h"
-
+#include "lv_port_indev.h"
 #include "main_page.h"
-
+#include "lv_common.h"
 
 #define TAG "lv_task"
 #define LV_TICK_PERIOD_MS 1
 
-static SemaphoreHandle_t xGuiMutex;
+SemaphoreHandle_t xGuiMutex;
 
 static void lv_tick_task(void *arg){
     (void)arg;
     lv_tick_inc(LV_TICK_PERIOD_MS);
 }
-
-void guiTask(void *arg){
-    (void)arg;
+static void guiTask(void *pvParameter){
+    (void)pvParameter;
     xGuiMutex = xSemaphoreCreateMutex();
+    //lvgl init
     lv_init();
 
+    //lvgl display init
     lv_port_disp_init();
 
-    //todo: lv indev init
+    //lvgl indev init
+    lv_port_indev_init();
+
 
     const esp_timer_create_args_t periodic_timer_args = {
         .callback = &lv_tick_task,
@@ -36,10 +50,11 @@ void guiTask(void *arg){
     esp_timer_handle_t periodic_timer;
     ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
     ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, LV_TICK_PERIOD_MS * 1000));
-
-    //lvgl demo
+    
+    //my gui
+    bg_page();
     show_main_page();
-
+    
     while (1)
     {
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -51,3 +66,6 @@ void guiTask(void *arg){
     vTaskDelete(NULL);
 }
 
+void lv_create_task(void){ 
+    xTaskCreatePinnedToCore(guiTask, "gui", 4096 * 2, NULL, 0, NULL, 1);
+}

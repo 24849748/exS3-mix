@@ -3,6 +3,9 @@
 #include "main_page.h"
 #include "lv_common.h"
 
+#include "esp_log.h"
+#define TAG "setting_page"
+
 #include <stdio.h>
 
 LV_FONT_DECLARE(font_LMYY);
@@ -24,7 +27,7 @@ static void return_mainpage_cb(lv_event_t *e){
     if(code == LV_EVENT_CLICKED) {
         //led_blink(PIN_LED);
         // anim_mainpage_out(0);
-        printf("return main page\n");
+        ESP_LOGI(TAG, "return main page");
         remove_setting_page_obj();
         show_main_page();
     }
@@ -67,25 +70,35 @@ void create_setting_btn(void){
     // lv_label_set_text(return_text," < ");
     // lv_obj_center(return_text);
 
-
-    btn_return = lv_label_create(bg_screen);
+    btn_return = create_text_btn(bg_screen);
     lv_obj_add_style(btn_return, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_set_style_bg_color(btn_return,lv_color_hex(0x21252b),LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(btn_return,LV_OPA_COVER,LV_STATE_DEFAULT);
-    lv_obj_set_style_radius(btn_return, 5, LV_STATE_DEFAULT);
-
-    lv_obj_set_style_bg_color(btn_return,lv_color_hex(0x202020),LV_STATE_PRESSED);
-    lv_obj_set_style_bg_opa(btn_return,LV_OPA_COVER,LV_STATE_PRESSED);
-    lv_obj_set_style_radius(btn_return, 5, LV_STATE_PRESSED);
-
-    lv_obj_align(btn_return, LV_ALIGN_TOP_LEFT,5,5);
-    lv_obj_set_size(btn_return, 36,30);
-    lv_obj_add_flag(btn_return, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_align(btn_return, LV_ALIGN_TOP_LEFT,10,10);
     lv_obj_add_event_cb(btn_return, return_mainpage_cb, LV_EVENT_CLICKED, NULL);
-    lv_label_set_recolor(btn_return,true);
-    lv_label_set_text(btn_return,"#88B2FB   < ");
+    lv_obj_set_size(btn_return, 40, 36);
+    lv_obj_set_ext_click_area(btn_return, 30);
+    lv_obj_t * text_return = lv_label_create(btn_return);
+    lv_label_set_recolor(text_return, true);
+    lv_label_set_text(text_return, "#88B2FB <");
+    lv_obj_set_style_text_font(text_return, &font_LMYY, 0);
+    lv_obj_center(text_return);
 
-    lv_obj_set_style_text_font(btn_return, &font_LMYY, 0);
+    // btn_return = lv_label_create(bg_screen);
+    // lv_obj_add_style(btn_return, &style_btn_pressed, LV_STATE_PRESSED);
+    // lv_obj_set_style_bg_color(btn_return,lv_color_hex(0x21252b),LV_STATE_DEFAULT);
+    // lv_obj_set_style_bg_opa(btn_return,LV_OPA_COVER,LV_STATE_DEFAULT);
+    // lv_obj_set_style_radius(btn_return, 5, LV_STATE_DEFAULT);
+
+    // lv_obj_set_style_bg_color(btn_return,lv_color_hex(0x202020),LV_STATE_PRESSED);
+    // lv_obj_set_style_bg_opa(btn_return,LV_OPA_COVER,LV_STATE_PRESSED);
+    // lv_obj_set_style_radius(btn_return, 5, LV_STATE_PRESSED);
+
+    // lv_obj_align(btn_return, LV_ALIGN_TOP_LEFT,5,5);
+    // lv_obj_set_size(btn_return, 36,30);
+    // lv_obj_add_flag(btn_return, LV_OBJ_FLAG_CLICKABLE);
+    // lv_obj_add_event_cb(btn_return, return_mainpage_cb, LV_EVENT_CLICKED, NULL);
+    // lv_label_set_recolor(btn_return,true);
+    // lv_label_set_text(btn_return,"#88B2FB   < ");
+    // lv_obj_set_style_text_font(btn_return, &font_LMYY, 0);
 
 }
 

@@ -7,7 +7,7 @@
 
 #define MOUNT_POINT "/sdcard"       //挂载点
 
-#define SPI_DMA_CHANNEL SPI_DMA_CH2
+#define SPI_DMA_CHANNEL SPI_DMA_CH_AUTO
 
 #define PIN_SD_MISO     19
 #define PIN_SD_MOSI     23

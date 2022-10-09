@@ -3,11 +3,11 @@
  *********************/
 #include "lv_port_disp.h"
 
-#include "lvgl_helpers.h"
-// #include "disp_driver.h"
-// #include "disp_spi.h"
-// #include "st7789.h"
-// #include "driver_conf.h"
+// #include "lvgl_helpers.h"
+#include "disp_driver.h"
+#include "disp_spi.h"
+#include "st7789.h"
+#include "driver_conf.h"
 
 #include "sdkconfig.h"
 #include <stdbool.h>
@@ -26,12 +26,12 @@ void lv_port_disp_init(void)
 {
     // disp_init();    
     // driver_disp_init(); //初始化spi屏幕
-    lvgl_driver_init();
+    driver_disp_init();
 
     static lv_disp_draw_buf_t draw_buf_dsc;
-    static lv_color_t buf_2_1[LV_HOR_RES_MAX * 10];                        /*A buffer for 10 rows*/
-    static lv_color_t buf_2_2[LV_VER_RES_MAX * 10];                        /*An other buffer for 10 rows*/
-    lv_disp_draw_buf_init(&draw_buf_dsc, buf_2_1, buf_2_2, LV_HOR_RES_MAX * 10);   /*Initialize the display buffer*/
+    static lv_color_t buf_2_1[LV_HOR_RES_MAX * 40];                        /*A buffer for 10 rows*/
+    static lv_color_t buf_2_2[LV_VER_RES_MAX * 40];                        /*An other buffer for 10 rows*/
+    lv_disp_draw_buf_init(&draw_buf_dsc, buf_2_1, buf_2_2, LV_HOR_RES_MAX * 40);   /*Initialize the display buffer*/
 
 
     /*-----------------------------------
@@ -53,7 +53,9 @@ void lv_port_disp_init(void)
     disp_drv.draw_buf = &draw_buf_dsc;
 
     /*Finally register the driver*/
+    // lv_disp_set_bg_color(&disp_drv, lv_color_hex(0x2c313c));
     lv_disp_drv_register(&disp_drv);
+    
 }
 
 /**********************

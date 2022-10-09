@@ -1,19 +1,19 @@
 #include "lv_common.h"
-// #include "bg_page.h"
 
 //--------------------background-------------------------//
 lv_obj_t *bg_screen;
 
 void bg_page(void){
     lv_obj_t *scr = lv_scr_act();
-
     bg_screen = lv_obj_create(scr);
     lv_obj_remove_style_all(bg_screen);
     lv_obj_set_size(bg_screen, 240, 320);
     lv_obj_set_style_radius(bg_screen,2,0); //圆角设置
     lv_obj_set_style_bg_opa(bg_screen,LV_OPA_COVER,0);
-    lv_obj_set_style_bg_color(bg_screen, BG_COLOR,0);
+    lv_obj_set_style_bg_color(bg_screen, BG_COLOR, 0);
     lv_obj_center(bg_screen);
+    // bg_screen = lv_scr_act();
+    // lv_obj_set_style_bg_color(bg_screen,BG_COLOR,0);
 }
 
 //----------------------style----------------------------//
@@ -59,7 +59,7 @@ lv_obj_t * create_click_imgbtn(lv_obj_t * parent, lv_event_cb_t event_cb, lv_ali
     lv_obj_add_style(obj, &style_btn_pressed, LV_STATE_PRESSED);
     lv_obj_add_flag(obj, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(obj, event_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_align(obj, align, x_ofs,y_ofs);
+    lv_obj_align(obj, align, x_ofs, y_ofs);
     return obj;
 }
 
@@ -81,11 +81,6 @@ lv_obj_t * create_text_btn(lv_obj_t * parent){
     lv_obj_set_style_bg_opa(obj, LV_OPA_COVER, LV_STATE_DEFAULT);
     lv_obj_set_style_radius(obj, 5, LV_STATE_DEFAULT);
     lv_obj_set_size(obj, 60, 40);
-
-    // lv_obj_t * text_speed = lv_label_create(ac_speed);
-    // lv_label_set_recolor(text_speed, true);
-    // lv_label_set_text(text_speed, "#88B2FB 风速");
-    // lv_obj_set_style_text_font(text_speed, &font_LMYY, 0);
 
     return obj;
 }

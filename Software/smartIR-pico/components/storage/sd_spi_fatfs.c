@@ -34,7 +34,7 @@ sdmmc_card_t * sd_spi_fatfs_init(void){
 
     //spi host配置
     sdmmc_host_t host = SDSPI_HOST_DEFAULT();
-    host.slot = VSPI_HOST;
+    host.slot = SPI3_HOST;
 
     //spi bus配置
     spi_bus_config_t buscfg = {
@@ -45,7 +45,7 @@ sdmmc_card_t * sd_spi_fatfs_init(void){
         .quadhd_io_num = -1,
         .max_transfer_sz = 8192,        // 最大传输字节数
     };
-    ret = spi_bus_initialize(VSPI_HOST, &buscfg, SPI_DMA_CHANNEL);
+    ret = spi_bus_initialize(SPI3_HOST, &buscfg, SPI_DMA_CHANNEL);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to initialize bus.");
         return NULL;

@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "ESP32",
+            "name": "ESP32S3",
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/components/**",
@@ -14,8 +14,8 @@
             ],
             "cStandard": "c99",
             "cppStandard": "c++17",
-            "intelliSenseMode": "windows-gcc-x64",
-            "compilerPath": "C:/Users/bosco/.espressif/Espressif/tools/xtensa-esp32-elf/esp-2021r2-patch3-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc.exe",
+            "intelliSenseMode": "windows-gcc-x86",
+            "compilerPath": "C:\\Users\\bosco\\.espressif\\Espressif\\tools\\xtensa-esp32s3-elf\\esp-2021r2-patch3-8.4.0\\xtensa-esp32s3-elf\\bin\\xtensa-esp32s3-elf-gcc.exe",
             "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],

@@ -16,6 +16,7 @@
 //--------------------background-------------------------//
 
 #define BG_COLOR lv_color_hex(0x2c313c) //vscode atom theme background
+// #define BG_COLOR lv_color_hex(0xffcc3e)
 #define TEXT_COLOR lv_color_hex(0x21252b)
 
 

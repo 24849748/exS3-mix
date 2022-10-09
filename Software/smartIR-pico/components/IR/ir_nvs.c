@@ -83,7 +83,7 @@ esp_err_t nvs_get_ac_binNUM(const char *key, uint8_t *numToGet){
 
     // numToGet = (uint8_t *)malloc(sizeof(uint8_t));
     
-    ESP_LOGI(TAG, "write to blob");
+    ESP_LOGI(TAG, "read read blob");
     err = nvs_get_u8(handle, key, numToGet);
     if(err != ESP_OK){
         ESP_LOGI(TAG,"get u8 blob fail, err = %d, key = %s", err, key);

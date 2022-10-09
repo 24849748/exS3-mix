@@ -3,14 +3,13 @@
 
 #include "lv_common.h"
 #include <stdio.h>
+#include "esp_log.h"
+#define TAG "fan_page"
+
 
 LV_FONT_DECLARE(font_LMYY);
-// LV_IMG_DECLARE(arrow_up);
-// LV_IMG_DECLARE(arrow_down);
 LV_IMG_DECLARE(logo_kaiguan);
-// LV_IMG_DECLARE(logo_swing);
-// LV_IMG_DECLARE(logo_class);
-// LV_IMG_DECLARE(logo_wet);
+
 
 //user data
 bool fanswitch = false;     //后面需要给其他任务extern
@@ -31,8 +30,6 @@ static lv_obj_t * bg_arc;
  */
 static void remove_fan_page_obj(void){
     lv_obj_del(fan_title);
-    // lv_obj_del(fan_up);
-    // lv_obj_del(fan_down);
     lv_obj_del(fan_return);
     lv_obj_del(fan_swing);
     lv_obj_del(fan_switch);
@@ -49,7 +46,7 @@ static void return_mainpage_cb(lv_event_t *e){
     if(code == LV_EVENT_CLICKED) {
         //led_blink(PIN_LED);
         // anim_mainpage_out(0);
-        printf("return main page\n");
+        ESP_LOGI(TAG, "return main page");
         remove_fan_page_obj();
         show_main_page();
     }
@@ -58,9 +55,9 @@ static void fan_switch_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
         if(fanswitch){
-            printf("fan: open\n");
+            ESP_LOGI(TAG, "fan: open");
         }else{
-            printf("fan: close\n");
+            ESP_LOGI(TAG, "fan: close");
         }
         fanswitch = !fanswitch;
     }
@@ -84,25 +81,25 @@ static void fan_down_cb(lv_event_t *e){
 static void fan_class_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
-        printf("fan: class\n");
+        ESP_LOGI(TAG, "fan: class");
     }
 }
 static void fan_wet_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
-        printf("fan: wet\n");
+        ESP_LOGI(TAG, "fan: wet");
     }
 }
 static void fan_swing_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
-        printf("fan: swing\n");
+        ESP_LOGI(TAG, "fan: swing");
     }
 }
 static void fan_speed_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
-        printf("fan: speed\n");
+        ESP_LOGI(TAG, "fan: speed");
     }
 }
 
@@ -137,18 +134,17 @@ void create_fan_text_btn2(void){
     fan_switch = create_click_imgbtn(bg_screen, fan_switch_cb, LV_ALIGN_CENTER, 0, 0);
     lv_img_set_src(fan_switch, &logo_kaiguan);
 
-    /* 返回按键 */
-    fan_return = lv_label_create(bg_screen);
+    fan_return = create_text_btn(bg_screen);
     lv_obj_add_style(fan_return, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_add_style(fan_return, &style_return_btn_default, LV_STATE_DEFAULT);
-    lv_obj_align(fan_return, LV_ALIGN_TOP_LEFT,5,5);
-    lv_obj_set_size(fan_return, 36,30);
-    lv_obj_add_flag(fan_return, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_align(fan_return, LV_ALIGN_TOP_LEFT,10,10);
     lv_obj_add_event_cb(fan_return, return_mainpage_cb, LV_EVENT_CLICKED, NULL);
-    lv_label_set_recolor(fan_return,true);
-    lv_label_set_text(fan_return,"#88B2FB   < ");
-    lv_obj_set_style_text_font(fan_return, &font_LMYY, 0);
-
+    lv_obj_set_size(fan_return, 40, 36);
+    lv_obj_set_ext_click_area(fan_return, 30);
+    lv_obj_t * text_return = lv_label_create(fan_return);
+    lv_label_set_recolor(text_return, true);
+    lv_label_set_text(text_return, "#88B2FB <");
+    lv_obj_set_style_text_font(text_return, &font_LMYY, 0);
+    lv_obj_center(text_return);
 
     /* 风速按钮 */
     fan_speed = lv_btn_create(bg_screen);
@@ -407,6 +403,7 @@ void create_fan_btn(void){
 
 
 void show_fan_page(void){
+    // bg_page();
     lv_init_btn_style();
     create_bg_circle();
     show_fan_title();

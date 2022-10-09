@@ -4,6 +4,9 @@
 #include "lv_common.h"
 #include <stdio.h>
 
+#include "esp_log.h"
+#define TAG "ac_page"
+
 LV_FONT_DECLARE(font_LMYY);
 LV_IMG_DECLARE(logo_kaiguan);
 
@@ -37,7 +40,7 @@ static void remove_ac_page_obj(void){
 static void return_mainpage_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
-        printf("return main page\n");
+        ESP_LOGI(TAG, "return main page");
         remove_ac_page_obj();
         show_main_page();
     }
@@ -46,9 +49,9 @@ static void ac_switch_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
         if(acswitch){
-            printf("ac: open\n");
+            ESP_LOGI(TAG, "ac: open");
         }else{
-            printf("ac: close\n");
+            ESP_LOGI(TAG, "ac: close");
         }
         acswitch = !acswitch;
     }
@@ -60,7 +63,7 @@ static void ac_arc_cb(lv_event_t *e){
         // draw_temp_cb();
         acTemperature = lv_arc_get_value(ac_arc);
         lv_label_set_text_fmt(text_temp, "#88B2FB %d°", acTemperature);
-        printf("ac: %d\n",lv_arc_get_value(ac_arc));
+        ESP_LOGI(TAG, "ac: %d", lv_arc_get_value(ac_arc));
     }
 }
 static void ac_add_cb(lv_event_t *e){
@@ -72,7 +75,7 @@ static void ac_add_cb(lv_event_t *e){
         }
         lv_arc_set_value(ac_arc, acTemperature);
         lv_label_set_text_fmt(text_temp, "#88B2FB %d°", acTemperature);
-        printf("ac temp add: %d\n",lv_arc_get_value(ac_arc));
+        ESP_LOGI(TAG, "ac temp add: %d",lv_arc_get_value(ac_arc));
     }
 }
 static void ac_cut_cb(lv_event_t *e){
@@ -84,7 +87,7 @@ static void ac_cut_cb(lv_event_t *e){
         }
         lv_arc_set_value(ac_arc, acTemperature);
         lv_label_set_text_fmt(text_temp, "#88B2FB %d°", acTemperature);
-        printf("ac temp cut: %d\n",lv_arc_get_value(ac_arc));
+        ESP_LOGI(TAG, "ac temp cut: %d",lv_arc_get_value(ac_arc));
     }
 }
 
@@ -117,6 +120,8 @@ void create_ac_arc(void){
     lv_arc_set_range(ac_arc, 16, 32);
     // lv_obj_remove_style(ac_arc, NULL, LV_PART_KNOB);
     lv_obj_add_event_cb(ac_arc, ac_arc_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_flag(ac_arc,LV_OBJ_FLAG_ADV_HITTEST);
+
 
     //圆弧温度
     text_temp = lv_label_create(ac_arc);
@@ -134,23 +139,18 @@ void create_ac_arc(void){
 
 void create_ac_btn(void){
     /* 返回键 */
-    ac_return = lv_label_create(bg_screen);
+    ac_return = create_text_btn(bg_screen);
     lv_obj_add_style(ac_return, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_set_style_bg_color(ac_return,lv_color_hex(0x21252b),LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ac_return,LV_OPA_COVER,LV_STATE_DEFAULT);
-    lv_obj_set_style_radius(ac_return, 5, LV_STATE_DEFAULT);
-
-    lv_obj_set_style_bg_color(ac_return,lv_color_hex(0x202020),LV_STATE_PRESSED);
-    lv_obj_set_style_bg_opa(ac_return,LV_OPA_COVER,LV_STATE_PRESSED);
-    lv_obj_set_style_radius(ac_return, 5, LV_STATE_PRESSED);
-
-    lv_obj_align(ac_return, LV_ALIGN_TOP_LEFT,5,5);
-    lv_obj_set_size(ac_return, 36,30);
-    lv_obj_add_flag(ac_return, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_align(ac_return, LV_ALIGN_TOP_LEFT,10,10);
     lv_obj_add_event_cb(ac_return, return_mainpage_cb, LV_EVENT_CLICKED, NULL);
-    lv_label_set_recolor(ac_return,true);
-    lv_label_set_text(ac_return,"#88B2FB   < ");
-    lv_obj_set_style_text_font(ac_return, &font_LMYY, 0);
+    lv_obj_set_size(ac_return, 40, 36);
+    lv_obj_set_ext_click_area(ac_return, 30);
+
+    lv_obj_t * text_return = lv_label_create(ac_return);
+    lv_label_set_recolor(text_return, true);
+    lv_label_set_text(text_return, "#88B2FB <");
+    lv_obj_set_style_text_font(text_return, &font_LMYY, 0);
+    lv_obj_center(text_return);
 
 
     /* 风扇开关 */
@@ -183,7 +183,7 @@ void create_ac_btn(void){
     lv_obj_center(text_speed);
 
 
-    /* 定时按钮 */
+    /* 摆风按钮 */
     ac_timing = lv_btn_create(bg_screen);
     lv_obj_remove_style(ac_timing, NULL, LV_PART_MAIN);
     lv_obj_add_style(ac_timing, &style_btn_pressed, LV_STATE_PRESSED);
@@ -196,16 +196,17 @@ void create_ac_btn(void){
 
     lv_obj_t * text_timing = lv_label_create(ac_timing);
     lv_label_set_recolor(text_timing, true);
-    lv_label_set_text(text_timing, "#88B2FB 定时");
+    lv_label_set_text(text_timing, "#88B2FB 摆风");
     lv_obj_set_style_text_font(text_timing, &font_LMYY, 0);
     lv_obj_center(text_timing);
     
 
     /* + button */
     ac_add = create_text_btn(bg_screen);
+    lv_obj_add_style(ac_add, &style_btn_pressed, LV_STATE_PRESSED);
     lv_obj_align(ac_add, LV_ALIGN_CENTER, 80, 35);
     lv_obj_add_event_cb(ac_add, ac_add_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_size(ac_add, 30, 30);
+    lv_obj_set_size(ac_add, 36, 36);
     lv_obj_t * text_add = lv_label_create(ac_add);
     lv_label_set_recolor(text_add, true);
     lv_label_set_text(text_add, "#88B2FB +");
@@ -215,9 +216,10 @@ void create_ac_btn(void){
 
     /* - button */
     ac_cut = create_text_btn(bg_screen);
+    lv_obj_add_style(ac_cut, &style_btn_pressed, LV_STATE_PRESSED);
     lv_obj_align(ac_cut, LV_ALIGN_CENTER, -80, 35);
     lv_obj_add_event_cb(ac_cut, ac_cut_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_size(ac_cut, 30, 30);
+    lv_obj_set_size(ac_cut, 36, 36);
     lv_obj_t * text_cut = lv_label_create(ac_cut);
     lv_label_set_recolor(text_cut, true);
     lv_label_set_text(text_cut, "#88B2FB -");
@@ -227,6 +229,7 @@ void create_ac_btn(void){
 
 
 void show_ac_page(void){
+    // bg_page();
     show_title_ac();
     create_ac_arc();
     create_ac_btn();
