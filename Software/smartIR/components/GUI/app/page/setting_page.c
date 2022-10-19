@@ -2,7 +2,7 @@
 // #include "bg_page.h"
 #include "main_page.h"
 #include "lv_common.h"
-
+#include "anim.h"
 #include "esp_log.h"
 #define TAG "setting_page"
 
@@ -13,11 +13,18 @@ LV_FONT_DECLARE(font_LMYY);
 static lv_obj_t * btn_return;
 static lv_obj_t * hello_text;
 static lv_obj_t * title_setting;
+// static lv_obj_t * bat_info;
 
-void remove_setting_page_obj(void){
-    lv_obj_del(btn_return);
-    lv_obj_del(hello_text);
-    lv_obj_del(title_setting);
+void setting_page_anim_in(uint32_t delay){
+    anim_y_fade_in(title_setting,-50, 10, delay,NULL);
+    anim_y_fade_in(btn_return,-50, 10, delay, NULL);
+    anim_y_fade_in(hello_text, 20, lv_obj_get_y(hello_text), delay, NULL);
+}
+
+void setting_page_anim_out(uint32_t delay){
+    anim_y_fade_out(title_setting,lv_obj_get_y(title_setting), -50, delay,lv_obj_del_anim_ready_cb);
+    anim_y_fade_out(btn_return,lv_obj_get_y(btn_return), -50, delay,lv_obj_del_anim_ready_cb);
+    anim_y_fade_out(hello_text,lv_obj_get_y(hello_text), 20, delay,lv_obj_del_anim_ready_cb);
 }
 
 
@@ -28,7 +35,7 @@ static void return_mainpage_cb(lv_event_t *e){
         //led_blink(PIN_LED);
         // anim_mainpage_out(0);
         ESP_LOGI(TAG, "return main page");
-        remove_setting_page_obj();
+        setting_page_anim_out(200);
         show_main_page();
     }
 }
@@ -41,6 +48,12 @@ void show_title_setting(void){
     lv_obj_set_style_text_font(title_setting,&font_LMYY,0);
     lv_obj_align(title_setting,LV_ALIGN_TOP_MID,0,10);  //位置
 }
+
+/* axp173信息 */
+// void show_bat_info(void){
+//     bat_info = lv_label_create(bg_screen);
+
+// }
 
 
 /* 滚动文本 */
@@ -106,4 +119,6 @@ void show_setting_page(void){
     show_title_setting();
     show_test();
     create_setting_btn();
+    setting_page_anim_in(200);
 }
+

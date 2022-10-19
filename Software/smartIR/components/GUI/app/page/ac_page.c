@@ -1,10 +1,10 @@
 #include "ac_page.h"
-// #include "bg_page.h"
 #include "main_page.h"
 #include "lv_common.h"
 #include <stdio.h>
-
+#include "anim.h"
 #include "esp_log.h"
+
 #define TAG "ac_page"
 
 LV_FONT_DECLARE(font_LMYY);
@@ -25,23 +25,45 @@ static lv_obj_t * ac_speed;     //风速按钮
 static lv_obj_t * ac_timing;    //定时按钮
 
 
-static void remove_ac_page_obj(void){
-    lv_obj_del(ac_title);
-    lv_obj_del(ac_return);
-    lv_obj_del(ac_switch);
-    lv_obj_del(ac_arc);
-    lv_obj_del(ac_speed);
-    lv_obj_del(ac_add);
-    lv_obj_del(ac_cut);
-    lv_obj_del(ac_timing);
+
+void ac_page_anim_in(uint32_t delay){
+    anim_y_fade_in(ac_title,-50, 10, delay,NULL);
+    anim_y_fade_in(ac_return,-50, 10, delay, NULL);
+
+    anim_y_fade_in(ac_switch,-100, -30, delay, NULL);
+
+    anim_step_in(ac_arc, 200);
+    anim_step_in(ac_add, 200);
+    anim_step_in(ac_cut, 200);
+    anim_step_in(text_temp, 200);
+
+    anim_x_fade_in(ac_timing, -100, -50, delay, NULL);
+    anim_x_fade_in(ac_speed, 100, 50, delay, NULL);
+
 }
+
+void ac_page_anim_out(uint32_t delay){
+    anim_y_fade_out(ac_title, lv_obj_get_y(ac_title), -50, delay,lv_obj_del_anim_ready_cb);
+    anim_y_fade_out(ac_return, lv_obj_get_y(ac_return), -50, delay,lv_obj_del_anim_ready_cb);
+
+    anim_y_fade_out(ac_switch, -30, -100, delay, lv_obj_del_anim_ready_cb);
+
+    anim_step_out(ac_arc, 200);
+    anim_step_out(ac_add, 200);
+    anim_step_out(ac_cut, 200);
+    anim_step_out(text_temp, 200);
+
+    anim_x_fade_out(ac_timing, -50, -100, delay, lv_obj_del_anim_ready_cb);
+    anim_x_fade_out(ac_speed, 50, 100, delay, lv_obj_del_anim_ready_cb);
+}
+
 
 /* 按钮回调函数 */
 static void return_mainpage_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
         ESP_LOGI(TAG, "return main page");
-        remove_ac_page_obj();
+        ac_page_anim_out(200);
         show_main_page();
     }
 }
@@ -229,10 +251,10 @@ void create_ac_btn(void){
 
 
 void show_ac_page(void){
-    // bg_page();
     show_title_ac();
     create_ac_arc();
     create_ac_btn();
+    ac_page_anim_in(200);
 }
 
 /**

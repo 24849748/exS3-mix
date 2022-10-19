@@ -2,7 +2,7 @@
 #include "fan_page.h"
 #include "setting_page.h"
 #include "ac_page.h"
-
+#include "anim.h"
 #include "lv_common.h"
 #include <stdio.h>
 
@@ -36,27 +36,6 @@ static lv_obj_t * btn_ac;           //空调界面按钮 obj
 static lv_obj_t * btn_setting;      //设置界面按钮 obj
 
 
-// /* wifi动图集 */
-// const lv_img_dsc_t *wifi_imgs[5] = {
-//     &logo_wifi_off,
-//     &logo_wifi_0,
-//     &logo_wifi_1,
-//     &logo_wifi_2,
-//     &logo_wifi_full,
-// };
-
-// /* 电池动图集 */
-// const lv_img_dsc_t *bat_imgs[8] = {
-//     &logo_bat_chargefailed,
-//     &logo_bat_warning,
-//     &logo_bat_charging,
-//     &logo_bat_0,
-//     &logo_bat_1,
-//     &logo_bat_2,
-//     &logo_bat_3,
-//     &logo_bat_4,
-// };
-
 /* 太空人动图集 */
 const lv_img_dsc_t *astronaut_imgs[7] = {
     &astronaut1,
@@ -75,30 +54,21 @@ const lv_img_dsc_t *astronaut_imgs[7] = {
     // &astronaut14,
 };
 
-/**
- * @brief 移除主页对象
- *
- */
-static void remove_main_page_obj(void){
-    lv_obj_del(btn_ac);
-    lv_obj_del(btn_fan);
-    lv_obj_del(astronaut);
-    lv_obj_del(btn_setting);
-    // lv_obj_del(top_info_bar);
+/* 动画animing */
+void main_page_anim_in(uint32_t delay){
+    anim_y_fade_in(astronaut,-100, lv_obj_get_y(astronaut), delay, NULL);
+    anim_y_fade_in(btn_ac, 100,-70, delay, NULL);
+    anim_y_fade_in(btn_fan, 100,-70, delay, NULL);
+    anim_y_fade_in(btn_setting, 100,-70, delay, NULL);
 }
 
+void main_page_anim_out(uint32_t delay){
+    anim_y_fade_out(astronaut, lv_obj_get_y(astronaut),-100, delay, lv_obj_del_anim_ready_cb);
+    anim_y_fade_out(btn_ac, -70, 100, delay, lv_obj_del_anim_ready_cb);
+    anim_y_fade_out(btn_fan, -70, 100, delay, lv_obj_del_anim_ready_cb);
+    anim_y_fade_out(btn_setting, -70, 100, delay, lv_obj_del_anim_ready_cb);
+}
 
-/* 动画animing */
-// void anim_mainpage_in(uint32_t delay){
-//     // obj_set_anim(btn_fan, -80, 5, 1000, delay + 500, anim_x_cb, NULL, lv_anim_path_bounce);
-//     // obj_set_anim(btn_ac, 80, -5, 1000, delay + 500, anim_x_cb, NULL, lv_anim_path_bounce);
-//     // obj_set_anim(astronaut, -80, 5, 1000, delay + 500, anim_x_cb, NULL, lv_anim_path_bounce);
-// }
-// void anim_mainpage_out(uint32_t delay){
-//     obj_set_anim(btn_fan, 240, lv_obj_get_x(btn_fan)+50, 5000, delay, anim_x_cb, lv_obj_del_anim_ready_cb, lv_anim_path_ease_out);
-//     obj_set_anim(btn_ac, lv_obj_get_x(btn_ac), 0, 500, delay, anim_x_cb, lv_obj_del_anim_ready_cb, lv_anim_path_ease_out);
-//     obj_set_anim(astronaut, 0, lv_obj_get_x(astronaut)+50, 500, delay, anim_x_cb, lv_obj_del_anim_ready_cb, lv_anim_path_overshoot);
-// }
 
 
 /* 按钮事件 */
@@ -108,7 +78,7 @@ static void btn_fan_cb(lv_event_t *e){
         //led_blink(PIN_LED);
         // anim_mainpage_out(0);
         ESP_LOGI(TAG, "enter fan page");
-        remove_main_page_obj();
+        main_page_anim_out(200);
         show_fan_page();
         // anim_mainpage_in(0);
     }
@@ -119,7 +89,7 @@ static void btn_ac_cb(lv_event_t *e){
         //led_blink(PIN_LED);
         // anim_mainpage_out(0);
         ESP_LOGI(TAG, "enter ac page");
-        remove_main_page_obj();
+        main_page_anim_out(200);
         show_ac_page();
     }
 }
@@ -129,7 +99,7 @@ static void btn_setting_cb(lv_event_t *e){
         //led_blink(PIN_LED);
         // anim_mainpage_out(0);
         ESP_LOGI(TAG, "enter setting page");
-        remove_main_page_obj();
+        main_page_anim_out(200);
         show_setting_page();
     }
 }
@@ -158,31 +128,6 @@ void gif_astronaut(void){
 }
 
 
-/* 顶部状态栏 */
-
-// void show_top_info_bar(void){
-//     top_info_bar = lv_obj_create(bg_screen);
-
-//     lv_obj_remove_style_all(top_info_bar);
-//     lv_obj_set_size(top_info_bar,240,20);
-//     // lv_style_set_color_filter_opa()
-//     lv_obj_set_style_bg_opa(top_info_bar, LV_OPA_0,0);
-//     // lv_obj_set_style_bg_color(top_info_bar,lv_color_white(),0);//lv_color_make(209, 154, 102)
-
-//     //bar底部隔离条
-//     lv_obj_set_style_border_color(top_info_bar,lv_color_make(136, 178, 251),0);
-//     lv_obj_get_style_border_opa(top_info_bar,LV_OPA_50);
-//     lv_obj_set_style_border_width(top_info_bar,1,0);
-//     lv_obj_set_style_border_side(top_info_bar,LV_BORDER_SIDE_BOTTOM,0);
-
-//     lv_obj_align(top_info_bar,LV_ALIGN_TOP_MID, 0,0);
-
-//     show_test();
-//     show_wifi_logo();
-//     show_bat_logo();
-// }
-
-
 
 void create_main_page_btn(void){
 
@@ -202,7 +147,7 @@ void create_main_page_btn(void){
     lv_obj_add_flag(btn_setting, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(btn_setting, btn_setting_cb, LV_EVENT_CLICKED, NULL);
     lv_img_set_src(btn_setting, &logo_setting);
-    lv_obj_align_to(btn_setting, btn_ac, LV_ALIGN_CENTER, -70, 0);
+    lv_obj_align(btn_setting, LV_ALIGN_BOTTOM_MID, -70, -70);
 
     /* 风扇按键 */
     btn_fan = lv_img_create(bg_screen);
@@ -211,13 +156,13 @@ void create_main_page_btn(void){
     lv_obj_add_flag(btn_fan, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(btn_fan, btn_fan_cb, LV_EVENT_CLICKED, NULL);
     lv_img_set_src(btn_fan, &logo_fan);
-    lv_obj_align_to(btn_fan, btn_ac, LV_ALIGN_CENTER, 70, 0);
+    lv_obj_align(btn_fan, LV_ALIGN_BOTTOM_MID, 70,-70);
 }
 
 
 void show_main_page(void){
-    // bg_page();
     lv_init_btn_style();
     create_main_page_btn();
     gif_astronaut();        //太空人动图
+    main_page_anim_in(200);
 }

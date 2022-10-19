@@ -9,13 +9,13 @@
 #define SPI_TFT_SPI_MODE (2)
 
 //引脚
-#define DISP_SPI_CS     13
+#define DISP_SPI_CS     12
 #define DISP_SPI_IO2    (-1)
 #define DISP_SPI_IO3    (-1)
 #define DISP_SPI_MISO   (-1)
 #define DISP_SPI_INPUT_DELAY_NS (0)
 #define DISP_SPI_MOSI   10
-#define DISP_SPI_CLK    14
+#define DISP_SPI_CLK    13
 
 #define TFT_SPI_HOST SPI3_HOST
 
@@ -33,8 +33,8 @@
 //非spi引脚
 #define ST7789_DC   21
 // #define ST7789_SOFT_RST 0
-#define ST7789_RST  12
-#define ST7789_BLK  38
+#define ST7789_RST  11
+#define ST7789_BLK  45
 
 /* lvgl_helpers.h */
 //水平最大分辨率

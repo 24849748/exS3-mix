@@ -5,12 +5,11 @@
 
 
 /* ↓ custom define */
-//pin by SmartIR picoD4 board 
-#define PIN_I2C_SDA         47
-#define PIN_I2C_SCL         48
+//pin by SmartIR exS3 board 
+#define PIN_I2C_SDA         48
+#define PIN_I2C_SCL         47
 #define I2C_PULLUP_EN       0
 #define I2C_SPEED_FREQ_HZ   200000
-
 /* ↑ custom define */
 
 #define NULL_I2C_REG_ADDR   0xFF    //无效寄存器地址

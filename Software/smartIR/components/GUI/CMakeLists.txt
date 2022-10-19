@@ -5,6 +5,7 @@ file(GLOB_RECURSE SOURCES
         ${GUI_ROOT_DIR}/app/font/*.c
         ${GUI_ROOT_DIR}/app/page/*.c
         ${GUI_ROOT_DIR}/app/img/*.c
+        ${GUI_ROOT_DIR}/app/anim/*.c
         ${GUI_ROOT_DIR}/port/*.c
         )
 
@@ -16,5 +17,6 @@ idf_component_register(
         ${GUI_ROOT_DIR}/port
         ${GUI_ROOT_DIR}/app/common
         ${GUI_ROOT_DIR}/app/page
+        ${GUI_ROOT_DIR}/app/anim
     REQUIRES 
         lvgl lvgl_drivers)

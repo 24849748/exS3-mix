@@ -1,6 +1,6 @@
 #include "fan_page.h"
 #include "main_page.h"
-
+#include "anim.h"
 #include "lv_common.h"
 #include <stdio.h>
 #include "esp_log.h"
@@ -24,19 +24,33 @@ static lv_obj_t * fan_class;
 static lv_obj_t * bg_arc;
 
 
-/**
- * @brief 移除风扇页面对象
- * 
- */
-static void remove_fan_page_obj(void){
-    lv_obj_del(fan_title);
-    lv_obj_del(fan_return);
-    lv_obj_del(fan_swing);
-    lv_obj_del(fan_switch);
-    lv_obj_del(fan_wet);
-    lv_obj_del(fan_class);
-    lv_obj_del(fan_speed);
-    lv_obj_del(bg_arc);
+
+void fan_page_anim_in(uint32_t delay){
+    anim_y_fade_in(fan_title,-50, 10, delay,NULL);
+    anim_y_fade_in(fan_return,-50, 10, delay, NULL);
+
+    anim_y_fade_in(fan_switch,-50, 0, delay, NULL);
+
+    anim_step_in(bg_arc, 200);
+    anim_step_in(fan_wet, 200);
+    anim_step_in(fan_class, 200);
+    anim_step_in(fan_swing, 200);
+    anim_step_in(fan_speed, 200);
+}
+
+
+void fan_page_anim_out(uint32_t delay){
+    anim_y_fade_out(fan_title,lv_obj_get_y(fan_title), -50, delay,lv_obj_del_anim_ready_cb);
+    anim_y_fade_out(fan_return,lv_obj_get_y(fan_return), -50, delay,lv_obj_del_anim_ready_cb);
+
+    anim_y_fade_out(fan_switch, 0, -50, delay,lv_obj_del_anim_ready_cb);
+
+    anim_step_out(bg_arc, 200);
+    anim_step_out(fan_wet, 200);
+    anim_step_out(fan_class, 200);
+    anim_step_out(fan_swing, 200);
+    anim_step_out(fan_speed, 200);
+
 }
 
 
@@ -47,7 +61,7 @@ static void return_mainpage_cb(lv_event_t *e){
         //led_blink(PIN_LED);
         // anim_mainpage_out(0);
         ESP_LOGI(TAG, "return main page");
-        remove_fan_page_obj();
+        fan_page_anim_out(200);
         show_main_page();
     }
 }
@@ -62,20 +76,6 @@ static void fan_switch_cb(lv_event_t *e){
         fanswitch = !fanswitch;
     }
 }
-#if 0
-static void fan_up_cb(lv_event_t *e){
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_CLICKED) {
-    printf("fan: up\n");
-    }
-}
-static void fan_down_cb(lv_event_t *e){
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_CLICKED) {
-        printf("fan: down\n");
-    }
-}
-#endif
 
 
 static void fan_class_cb(lv_event_t *e){
@@ -229,185 +229,11 @@ void create_fan_text_btn2(void){
     lv_obj_center(text_wet);
 }
 
-#if 0
-/* 文字按钮 */
-void create_fan_text_btn(void){
-
-    fan_switch = create_click_imgbtn(bg_screen, fan_switch_cb, LV_ALIGN_TOP_MID, 0, 45);
-    lv_img_set_src(fan_switch, &logo_kaiguan);
-
-    // /* 加 */
-    // fan_up = lv_img_create(bg_screen);
-    // lv_obj_add_style(fan_up, &style_btn_pressed, LV_STATE_PRESSED);
-    // lv_obj_set_style_transform_zoom(fan_up, 200, 0);
-    // lv_obj_add_flag(fan_up, LV_OBJ_FLAG_CLICKABLE);
-    // lv_obj_add_event_cb(fan_up, fan_up_cb, LV_EVENT_CLICKED, NULL);
-    // lv_img_set_src(fan_up, &arrow_up);
-    // lv_obj_align(fan_up, LV_ALIGN_RIGHT_MID, -30, -40);
-
-    // /* 减 */
-    // fan_down = lv_img_create(bg_screen);
-    // lv_obj_add_style(fan_down, &style_btn_pressed, LV_STATE_PRESSED);
-    // lv_obj_set_style_transform_zoom(fan_down, 200, 0);
-    // lv_obj_add_flag(fan_down, LV_OBJ_FLAG_CLICKABLE);
-    // lv_obj_add_event_cb(fan_down, fan_down_cb, LV_EVENT_CLICKED, NULL);
-    // lv_img_set_src(fan_down, &arrow_down);
-    // lv_obj_align(fan_down, LV_ALIGN_RIGHT_MID, -30, 80);
-
-    /* 返回按键 */
-    fan_return = lv_label_create(bg_screen);
-    lv_obj_add_style(fan_return, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_add_style(fan_return, &style_return_btn_default, LV_STATE_DEFAULT);
-    lv_obj_align(fan_return, LV_ALIGN_TOP_LEFT,5,5);
-    lv_obj_set_size(fan_return, 36,30);
-    lv_obj_add_flag(fan_return, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(fan_return, return_mainpage_cb, LV_EVENT_CLICKED, NULL);
-    lv_label_set_recolor(fan_return,true);
-    lv_label_set_text(fan_return,"#88B2FB   < ");
-    lv_obj_set_style_text_font(fan_return, &font_LMYY, 0);
-
-
-
-    /* 风类按钮 */
-    fan_class = lv_btn_create(bg_screen);
-    lv_obj_remove_style(fan_class, NULL, LV_PART_MAIN);
-    lv_obj_add_style(fan_class, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_set_style_bg_color(fan_class, lv_color_hex(0x21252b), LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(fan_class, LV_OPA_COVER, LV_STATE_DEFAULT);
-    lv_obj_set_style_radius(fan_class, 5, LV_STATE_DEFAULT);
-    lv_obj_set_size(fan_class, 60, 40);
-    lv_obj_align(fan_class, LV_ALIGN_LEFT_MID, 30, 20);
-    lv_obj_add_event_cb(fan_class, fan_class_cb, LV_EVENT_CLICKED, NULL);
-
-    lv_obj_t * text_class = lv_label_create(fan_class);
-    lv_label_set_recolor(text_class, true);
-    lv_label_set_text(text_class, "#88B2FB 风类");
-    lv_obj_set_style_text_font(text_class, &font_LMYY, 0);
-    lv_obj_center(text_class);
-
-
-
-    /* 摆风按钮 */
-    fan_swing = lv_btn_create(bg_screen);
-    lv_obj_remove_style(fan_swing, NULL, LV_PART_MAIN);
-    lv_obj_add_style(fan_swing, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_set_style_bg_color(fan_swing, lv_color_hex(0x21252b), LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(fan_swing, LV_OPA_COVER, LV_STATE_DEFAULT);
-    lv_obj_set_style_radius(fan_swing, 5, LV_STATE_DEFAULT);
-    lv_obj_set_size(fan_swing, 60, 40);
-    lv_obj_align_to(fan_swing, fan_class, LV_ALIGN_CENTER, 0, -60);
-    lv_obj_add_event_cb(fan_swing, fan_swing_cb, LV_EVENT_CLICKED, NULL);
-
-    lv_obj_t * text_swing = lv_label_create(fan_swing);
-    lv_label_set_recolor(text_swing, true);
-    lv_label_set_text(text_swing, "#88B2FB 摆风");
-    lv_obj_set_style_text_font(text_swing, &font_LMYY, 0);
-    lv_obj_center(text_swing);
-
-
-
-    /* 加湿按钮 */
-    fan_wet = lv_btn_create(bg_screen);
-    lv_obj_remove_style(fan_wet, NULL, LV_PART_MAIN);
-    lv_obj_add_style(fan_wet, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_set_style_bg_color(fan_wet, lv_color_hex(0x21252b), LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(fan_wet, LV_OPA_COVER, LV_STATE_DEFAULT);
-    lv_obj_set_style_radius(fan_wet, 5, LV_STATE_DEFAULT);
-    lv_obj_set_size(fan_wet, 60, 40);
-    lv_obj_align_to(fan_wet, fan_class, LV_ALIGN_CENTER, 0, 60);
-    lv_obj_add_event_cb(fan_wet, fan_wet_cb, LV_EVENT_CLICKED, NULL);
-
-    lv_obj_t * text_wet = lv_label_create(fan_wet);
-    lv_label_set_recolor(text_wet, true);
-    lv_label_set_text(text_wet, "#88B2FB 加湿");
-    lv_obj_set_style_text_font(text_wet, &font_LMYY, 0);
-    lv_obj_center(text_wet);
-
-}
-
-/* 按钮集合 */
-void create_fan_btn(void){
-
-    /* 风扇开关 */
-    // fan_switch = lv_img_create(bg_screen);
-    // lv_obj_add_style(fan_switch, &style_btn_pressed, LV_STATE_PRESSED);
-    // lv_obj_add_flag(fan_switch, LV_OBJ_FLAG_CLICKABLE);
-    // lv_obj_add_event_cb(fan_switch, fan_switch_cb, LV_EVENT_CLICKED, NULL);
-    // lv_img_set_src(fan_switch, &logo_kaiguan);
-    // lv_obj_align(fan_switch, LV_ALIGN_TOP_MID, 0,50);
-    /* 风扇开关 */
-    fan_switch = create_click_imgbtn(bg_screen, fan_switch_cb, LV_ALIGN_TOP_MID, 0, 35);
-    lv_img_set_src(fan_switch, &logo_kaiguan);
-
-    /* 加 */
-    fan_up = lv_img_create(bg_screen);
-    lv_obj_add_style(fan_up, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_add_flag(fan_up, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(fan_up, fan_up_cb, LV_EVENT_CLICKED, NULL);
-    lv_img_set_src(fan_up, &arrow_up);
-    lv_obj_align(fan_up, LV_ALIGN_RIGHT_MID, -35, -40);
-
-    /* 减 */
-    fan_down = lv_img_create(bg_screen);
-    lv_obj_add_style(fan_down, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_add_flag(fan_down, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(fan_down, fan_down_cb, LV_EVENT_CLICKED, NULL);
-    lv_img_set_src(fan_down, &arrow_down);
-    lv_obj_align(fan_down, LV_ALIGN_RIGHT_MID, -35, 80);
-
-
-    /* 返回按键 */
-    fan_return = lv_label_create(bg_screen);
-    lv_obj_add_style(fan_return, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_add_style(fan_return, &style_return_btn_default, LV_STATE_DEFAULT);
-    lv_obj_align(fan_return, LV_ALIGN_TOP_LEFT,5,5);
-    lv_obj_set_size(fan_return, 36,30);
-    lv_obj_add_flag(fan_return, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(fan_return, return_mainpage_cb, LV_EVENT_CLICKED, NULL);
-    lv_label_set_recolor(fan_return,true);
-    lv_label_set_text(fan_return,"#88B2FB   < ");
-    lv_obj_set_style_text_font(fan_return, &font_LMYY, 0);
-
-
-    /* 风类按钮 */
-    fan_class = lv_img_create(bg_screen);
-    lv_obj_add_style(fan_class, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_set_style_transform_zoom(fan_class, 200, 0);
-    lv_obj_add_flag(fan_class, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(fan_class, fan_class_cb, LV_EVENT_CLICKED, NULL);
-    lv_img_set_src(fan_class, &logo_class);
-    lv_obj_align(fan_class, LV_ALIGN_LEFT_MID, 30, 20);
-    // lv_obj_align_to(fan_class, fan_swing, LV_ALIGN_CENTER, 0, 60);
-
-    /* 摆风按钮 */
-    fan_swing = lv_img_create(bg_screen);
-    lv_obj_add_style(fan_swing, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_add_flag(fan_swing, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(fan_swing, fan_swing_cb, LV_EVENT_CLICKED, NULL);
-    lv_img_set_src(fan_swing, &logo_swing);
-    // lv_obj_align(fan_swing, LV_ALIGN_LEFT_MID, 30, -50);
-    lv_obj_align_to(fan_swing, fan_class, LV_ALIGN_CENTER, 0, -60);
-
-    /* 加湿按钮 */
-    fan_wet = lv_img_create(bg_screen);
-    lv_obj_add_style(fan_wet, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_set_style_transform_zoom(fan_wet, 200, 0);
-    lv_obj_add_flag(fan_wet, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(fan_wet, fan_wet_cb, LV_EVENT_CLICKED, NULL);
-    lv_img_set_src(fan_wet, &logo_wet);
-    lv_obj_align_to(fan_wet, fan_class, LV_ALIGN_CENTER, 0, 60);
-
-}
-
-#endif
-
 
 void show_fan_page(void){
-    // bg_page();
     lv_init_btn_style();
     create_bg_circle();
     show_fan_title();
-    // create_fan_btn();
-    // create_fan_text_btn();
     create_fan_text_btn2();
+    fan_page_anim_in(200);
 }

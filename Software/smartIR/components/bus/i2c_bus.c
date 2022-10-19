@@ -138,7 +138,7 @@ esp_err_t i2c_bus_deinit(i2c_port_t port){
 /**
  * @brief i2c读取多个字节
  * 
- * @param port  i2c总线端口号，I2C_NUM_0或I2C_NUM_0
+ * @param port  i2c总线端口号，I2C_NUM_0或I2C_NUM_1
  * @param addr  设备地址
  * @param reg   寄存器
  * @param data  读取后返回的数据
@@ -152,7 +152,7 @@ esp_err_t i2c_bus_read_bytes(i2c_port_t port, uint8_t addr, uint8_t reg, uint8_t
 /**
  * @brief i2c读取单个字节
  * 
- * @param port  i2c总线端口号，I2C_NUM_0或I2C_NUM_0
+ * @param port  i2c总线端口号，I2C_NUM_0或I2C_NUM_1
  * @param addr  设备地址
  * @param reg   寄存器
  * @param data  读取后返回的数据
@@ -165,7 +165,7 @@ esp_err_t i2c_bus_read_byte(i2c_port_t port, uint8_t addr, uint8_t reg, uint8_t 
 /**
  * @brief i2c读取单个位
  * 
- * @param port      i2c总线端口号，I2C_NUM_0或I2C_NUM_0
+ * @param port      i2c总线端口号，I2C_NUM_0或I2C_NUM_1
  * @param addr      设备地址
  * @param reg       寄存器
  * @param bit_num   待读取的位
@@ -184,7 +184,7 @@ esp_err_t i2c_bus_read_bit(i2c_port_t port, uint8_t addr, uint8_t reg, uint8_t b
 /**
  * @brief i2c读取多个位
  * 
- * @param port      i2c总线端口号，I2C_NUM_0或I2C_NUM_0
+ * @param port      i2c总线端口号，I2C_NUM_0或I2C_NUM_1
  * @param addr      设备地址
  * @param reg       寄存器
  * @param bit_start 开始读取bit的位置
@@ -211,7 +211,7 @@ esp_err_t i2c_bus_read_bits(i2c_port_t port, uint8_t addr, uint8_t reg, uint8_t 
 /**
  * @brief i2c写入多个字节
  * 
- * @param port  i2c总线端口号，I2C_NUM_0或I2C_NUM_0
+ * @param port  i2c总线端口号，I2C_NUM_0或I2C_NUM_1
  * @param addr  设备地址
  * @param reg   寄存器
  * @param data  待写入数据
@@ -225,7 +225,7 @@ esp_err_t i2c_bus_write_bytes(i2c_port_t port, uint8_t addr, uint8_t reg, const 
 /**
  * @brief i2c写入单个字节
  * 
- * @param port  i2c总线端口号，I2C_NUM_0或I2C_NUM_0
+ * @param port  i2c总线端口号，I2C_NUM_0或I2C_NUM_1
  * @param addr  设备地址
  * @param reg   寄存器
  * @param data  待写入数据
@@ -259,7 +259,7 @@ esp_err_t i2c_bus_write_bit(i2c_port_t port, uint8_t addr, uint8_t reg, uint8_t 
 /**
  * @brief i2c写入多个位
  * 
- * @param port      i2c总线端口号，I2C_NUM_0或I2C_NUM_0
+ * @param port      i2c总线端口号，I2C_NUM_0或I2C_NUM_1
  * @param addr      设备地址
  * @param reg       寄存器
  * @param bit_start 开始写入bit的位置
