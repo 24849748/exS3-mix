@@ -1,41 +1,37 @@
-# SmartIR
+# exS3
 
-SmartIR的本意是减少家里的红外遥控器数量
+> - 为学习ESP32 S3和LVGL而设计的软硬件项目
+> - 尺寸迷你，包含3D外壳约40×60×18mm
+>
+> - 自制4层PCB，模块剩余引脚已全部引出，具备一定外设扩展性
+> - 基于ESP-IDF 4.4.2 开发框架，手撸纯C
 
-## 关键词：
 
-- ESP32
-- ESP-IDF
-- LVGL
-- IREXT : https://cc.irext.net/index.html#intro
 
 
 
 ## 硬件信息
 
-自制PCB，先上图片~
-
-【to add】
-
-
-
-### 引脚（基于exS3）
-
-| name     | gpio   | name     | gpio   |
-| -------- | ------ | -------- | ------ |
-| SPI_MOSI | 10     | I2C_SDA  | 48     |
-| SPI_MISO | 14     | I2C_SCL  | 47     |
-| SPI_CLK  | 13     | CTP_INT  | 46     |
-| TFT_CS   | 12     | ////     | ////   |
-| TFT_DC   | 21     | LED      | 1      |
-| TFT_RST  | 11     | BUZZ     | 38     |
-| TFT_BLK  | 45     | ////     | ////   |
-| SD_CS    | 9      | ECD_A    | 6      |
-| ////     | ////   | ECD_B    | 8      |
-| PMU_IRQ  | 39     | ECD_BTN  | 15     |
-| ////     | ////   | ////     | ////   |
-| ~~IR_R~~ | ~~34~~ | ~~IR_T~~ | ~~26~~ |
+- MCU：ESP32 S3 N8R8
+- 屏幕：2.0inch ST7789 SPI接口，分辨率240×320
+- 存储：8Mb Flash + 外置SD Card
+- 输入设备：按键（GPIO0）+ 旋转编码器 + FT62x6电容触摸
+- 电池：3.7V锂电池 100mA 301525（该版3D外壳可用的最大尺寸）
+- 指示：LED + DET402/震动马达
+- 陀螺仪：MPU6050
+- 电源管理：AXP173
+- 
 
 
+
+## 图片演示
+
+![1](Pictures/1.jpg)
+
+![2](Pictures/2.jpg)
+
+
+
+## 致谢
 
 
