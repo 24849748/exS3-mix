@@ -27,44 +27,14 @@ static lv_obj_t * bg_arc;
 
 
 
-void fan_page_anim_in(uint32_t delay){
-    anim_y_fade_in(fan_title,-50, 10, delay,NULL);
-    anim_y_fade_in(fan_return,-50, 10, delay, NULL);
-
-    anim_y_fade_in(fan_switch,-50, 0, delay, NULL);
-
-    anim_step_in(bg_arc, 200);
-    anim_step_in(fan_wet, 200);
-    anim_step_in(fan_class, 200);
-    anim_step_in(fan_swing, 200);
-    anim_step_in(fan_speed, 200);
-}
-
-
-void fan_page_anim_out(uint32_t delay){
-    anim_y_fade_out(fan_title,lv_obj_get_y(fan_title), -50, delay,lv_obj_del_anim_ready_cb);
-    anim_y_fade_out(fan_return,lv_obj_get_y(fan_return), -50, delay,lv_obj_del_anim_ready_cb);
-
-    anim_y_fade_out(fan_switch, 0, -50, delay,lv_obj_del_anim_ready_cb);
-
-    anim_step_out(bg_arc, 200);
-    anim_step_out(fan_wet, 200);
-    anim_step_out(fan_class, 200);
-    anim_step_out(fan_swing, 200);
-    anim_step_out(fan_speed, 200);
-
-}
-
 
 /* 按钮回调函数 */
 static void return_mainpage_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
-        //led_blink(PIN_LED);
-        // anim_mainpage_out(0);
         ESP_LOGI(TAG, "return main page");
         fan_page_anim_out(200);
-        show_main_page();
+        main_page_anim_in(200);
     }
 }
 static void fan_switch_cb(lv_event_t *e){
@@ -232,10 +202,58 @@ void create_fan_text_btn2(void){
 }
 
 
-void show_fan_page(void){
-    lv_init_btn_style();
-    create_bg_circle();
+/*************************
+ *        页面动画
+ *************************/
+
+void fan_page_anim_in(uint32_t delay){
+    anim_y_fade_in(fan_title,-50, 10, delay);
+    anim_y_fade_in(fan_return,-50, 10, delay);
+
+    anim_y_fade_in(fan_switch,-50, 0, delay);
+
+    anim_step_in(bg_arc, 200);
+    anim_step_in(fan_wet, 200);
+    anim_step_in(fan_class, 200);
+    anim_step_in(fan_swing, 200);
+    anim_step_in(fan_speed, 200);
+}
+
+
+void fan_page_anim_out(uint32_t delay){
+    anim_y_fade_out(fan_title,lv_obj_get_y(fan_title), -50, delay);
+    anim_y_fade_out(fan_return,lv_obj_get_y(fan_return), -50, delay);
+
+    anim_y_fade_out(fan_switch, 0, -50, delay);
+
+    anim_step_out(bg_arc, 200);
+    anim_step_out(fan_wet, 200);
+    anim_step_out(fan_class, 200);
+    anim_step_out(fan_swing, 200);
+    anim_step_out(fan_speed, 200);
+
+}
+
+
+/*************************
+ *        页面API
+ *************************/
+
+void fan_page_hide_obj(void){
+    lv_obj_add_flag(fan_return, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(fan_title, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(fan_switch, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(bg_arc, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(fan_wet, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(fan_class, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(fan_swing, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(fan_speed, LV_OBJ_FLAG_HIDDEN);
+}
+
+void fan_page_create_obj(void){
     show_fan_title();
+    create_bg_circle();
     create_fan_text_btn2();
-    fan_page_anim_in(200);
+
+    fan_page_hide_obj();
 }

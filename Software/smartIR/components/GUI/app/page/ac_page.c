@@ -10,13 +10,14 @@
 #define TAG "ac_page"
 
 LV_FONT_DECLARE(font_LMYY);
+LV_FONT_DECLARE(HmOS_35px);
 LV_IMG_DECLARE(logo_kaiguan);
 
 //user data
 bool acswitch = false;     //后面需要给其他任务extern
 int16_t acTemperature = 26;
 
-static lv_obj_t * ac_title;     //标题
+
 static lv_obj_t * ac_return;    //返回键
 static lv_obj_t * ac_switch;    //开关键
 static lv_obj_t * ac_arc;       //圆弧条
@@ -28,45 +29,13 @@ static lv_obj_t * ac_timing;    //定时按钮
 
 
 
-void ac_page_anim_in(uint32_t delay){
-    anim_y_fade_in(ac_title,-50, 10, delay,NULL);
-    anim_y_fade_in(ac_return,-50, 10, delay, NULL);
-
-    anim_y_fade_in(ac_switch,-100, -30, delay, NULL);
-
-    anim_step_in(ac_arc, 200);
-    anim_step_in(ac_add, 200);
-    anim_step_in(ac_cut, 200);
-    anim_step_in(text_temp, 200);
-
-    anim_x_fade_in(ac_timing, -100, -50, delay, NULL);
-    anim_x_fade_in(ac_speed, 100, 50, delay, NULL);
-
-}
-
-void ac_page_anim_out(uint32_t delay){
-    anim_y_fade_out(ac_title, lv_obj_get_y(ac_title), -50, delay, lv_obj_del_anim_ready_cb);
-    anim_y_fade_out(ac_return, lv_obj_get_y(ac_return), -50, delay, lv_obj_del_anim_ready_cb);
-
-    anim_y_fade_out(ac_switch, -30, -100, delay, lv_obj_del_anim_ready_cb);
-
-    anim_step_out(ac_arc, 200);
-    anim_step_out(ac_add, 200);
-    anim_step_out(ac_cut, 200);
-    anim_step_out(text_temp, 200);
-
-    anim_x_fade_out(ac_timing, -50, -100, delay, lv_obj_del_anim_ready_cb);
-    anim_x_fade_out(ac_speed, 50, 100, delay, lv_obj_del_anim_ready_cb);
-}
-
-
 /* 按钮回调函数 */
 static void return_mainpage_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
         ESP_LOGI(TAG, "return main page");
         ac_page_anim_out(200);
-        show_main_page();
+        main_page_anim_in(200);
     }
 }
 static void ac_switch_cb(lv_event_t *e){
@@ -83,8 +52,6 @@ static void ac_switch_cb(lv_event_t *e){
 static void ac_arc_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_VALUE_CHANGED){
-        // lv_obj_del(ac_temp);
-        // draw_temp_cb();
         acTemperature = lv_arc_get_value(ac_arc);
         lv_label_set_text_fmt(text_temp, "#88B2FB %d°", acTemperature);
         ESP_LOGI(TAG, "ac: %d", lv_arc_get_value(ac_arc));
@@ -115,15 +82,20 @@ static void ac_cut_cb(lv_event_t *e){
     }
 }
 
-/* 显示风扇文字标题 */
-void show_title_ac(void){
-    ac_title = lv_label_create(bg_screen);
-    lv_label_set_recolor(ac_title, true);
-    lv_label_set_text(ac_title, "#88B2FB 空调");
-    lv_obj_set_style_text_font(ac_title, &font_LMYY,0);
-    lv_obj_align(ac_title, LV_ALIGN_TOP_MID, 0, 10);  //位置
-}
 
+
+/*************************
+ *      绘制页面内容
+ *************************/
+
+/* 显示风扇文字标题 */
+// void show_title_ac(void){
+//     ac_title = lv_label_create(bg_screen);
+//     lv_label_set_recolor(ac_title, true);
+//     lv_label_set_text(ac_title, "#88B2FB 空调");
+//     lv_obj_set_style_text_font(ac_title, &font_LMYY,0);
+//     lv_obj_align(ac_title, LV_ALIGN_TOP_MID, 0, 10);  //位置
+// }
 
 /* 温度圆弧 */
 void create_ac_arc(void){
@@ -144,8 +116,8 @@ void create_ac_arc(void){
     lv_arc_set_range(ac_arc, 16, 32);
     // lv_obj_remove_style(ac_arc, NULL, LV_PART_KNOB);
     lv_obj_add_event_cb(ac_arc, ac_arc_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_obj_add_flag(ac_arc,LV_OBJ_FLAG_ADV_HITTEST);
 
+    lv_obj_clear_flag(ac_arc, LV_OBJ_FLAG_CLICKABLE);
 
     //圆弧温度
     text_temp = lv_label_create(ac_arc);
@@ -158,23 +130,24 @@ void create_ac_arc(void){
 
 }
 
-
-
-
 void create_ac_btn(void){
     /* 返回键 */
-    ac_return = create_text_btn(bg_screen);
-    lv_obj_add_style(ac_return, &style_btn_pressed, LV_STATE_PRESSED);
-    lv_obj_align(ac_return, LV_ALIGN_TOP_LEFT,10,10);
-    lv_obj_add_event_cb(ac_return, return_mainpage_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_size(ac_return, 40, 36);
-    lv_obj_set_ext_click_area(ac_return, 30);
+    ac_return = lv_img_create(bg_screen);
+    // lv_obj_set_style_bg_opa(ac_return, LV_OPA_0, LV_STATE_DEFAULT);
+    // lv_obj_set_style_radius(ac_return, 7, LV_STATE_PRESSED);
 
-    lv_obj_t * text_return = lv_label_create(ac_return);
-    lv_label_set_recolor(text_return, true);
-    lv_label_set_text(text_return, "#88B2FB <");
-    lv_obj_set_style_text_font(text_return, &font_LMYY, 0);
-    lv_obj_center(text_return);
+    // lv_obj_set_style_bg_color(ac_return, lv_color_black(),LV_STATE_PRESSED);
+    // lv_obj_set_style_bg_opa(ac_return, LV_OPA_100, LV_STATE_PRESSED);
+    lv_obj_set_style_translate_y(ac_return, 5, LV_STATE_PRESSED);
+
+    lv_obj_align(ac_return, LV_ALIGN_TOP_LEFT, 10, 15);
+    // lv_obj_set_size(ac_return, 43, 20);
+    // lv_obj_set_size(ac_return, 60, 21);
+    lv_obj_add_flag(ac_return, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(ac_return, return_mainpage_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_ext_click_area(ac_return, 20);
+    LV_IMG_DECLARE(logo_return);
+    lv_img_set_src(ac_return, &logo_return); 
 
 
     /* 风扇开关 */
@@ -204,10 +177,12 @@ void create_ac_btn(void){
     lv_label_set_recolor(text_speed, true);
     lv_label_set_text(text_speed, "#88B2FB 风速");
     lv_obj_set_style_text_font(text_speed, &font_LMYY, 0);
+    // lv_label_set_text(text_speed, "#88B2FB Speed");
+    // lv_obj_set_style_text_font(text_speed, &HmOS_35px, 0);
     lv_obj_center(text_speed);
 
 
-    /* 摆风按钮 */
+    /* 定时按钮 */
     ac_timing = lv_btn_create(bg_screen);
     lv_obj_remove_style(ac_timing, NULL, LV_PART_MAIN);
     lv_obj_add_style(ac_timing, &style_btn_pressed, LV_STATE_PRESSED);
@@ -220,48 +195,95 @@ void create_ac_btn(void){
 
     lv_obj_t * text_timing = lv_label_create(ac_timing);
     lv_label_set_recolor(text_timing, true);
-    lv_label_set_text(text_timing, "#88B2FB 摆风");
+    lv_label_set_text(text_timing, "#88B2FB 定时");
     lv_obj_set_style_text_font(text_timing, &font_LMYY, 0);
+    // lv_label_set_text(text_timing, "#88B2FB Timing");
+    // lv_obj_set_style_text_font(text_timing, &HmOS_35px, 0);
     lv_obj_center(text_timing);
     
 
     /* + button */
     ac_add = create_text_btn(bg_screen);
-    lv_obj_add_style(ac_add, &style_btn_pressed, LV_STATE_PRESSED);
     lv_obj_align(ac_add, LV_ALIGN_CENTER, 80, 35);
     lv_obj_add_event_cb(ac_add, ac_add_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_size(ac_add, 36, 36);
+    lv_obj_set_size(ac_add, 30, 30);
     lv_obj_t * text_add = lv_label_create(ac_add);
     lv_label_set_recolor(text_add, true);
     lv_label_set_text(text_add, "#88B2FB +");
     lv_obj_set_style_text_font(text_add, &font_LMYY, 0);
+    // lv_obj_set_style_text_font(text_add, &HmOS_35px, 0);
+    
     lv_obj_center(text_add);
     
 
     /* - button */
     ac_cut = create_text_btn(bg_screen);
-    lv_obj_add_style(ac_cut, &style_btn_pressed, LV_STATE_PRESSED);
     lv_obj_align(ac_cut, LV_ALIGN_CENTER, -80, 35);
     lv_obj_add_event_cb(ac_cut, ac_cut_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_size(ac_cut, 36, 36);
+    lv_obj_set_size(ac_cut, 30, 30);
     lv_obj_t * text_cut = lv_label_create(ac_cut);
     lv_label_set_recolor(text_cut, true);
     lv_label_set_text(text_cut, "#88B2FB -");
     lv_obj_set_style_text_font(text_cut, &font_LMYY, 0);
+    // lv_obj_set_style_text_font(text_cut, &HmOS_35px, 0);
     lv_obj_center(text_cut);
 }
 
 
-void show_ac_page(void){
-    show_title_ac();
-    create_ac_arc();
-    create_ac_btn();
-    ac_page_anim_in(200);
+
+/*************************
+ *        页面动画
+ *************************/
+
+void ac_page_anim_in(uint32_t delay){
+    // anim_y_fade_in(ac_title,-50, 10, delay,NULL);
+    anim_y_fade_in(ac_return,-50, 15, delay);
+    anim_y_fade_in(ac_switch,-100, -30, delay);
+    anim_step_in(ac_arc, 200);
+    anim_step_in(ac_add, 200);
+    anim_step_in(ac_cut, 200);
+    anim_step_in(text_temp, 200);
+
+    anim_x_fade_in(ac_timing, -100, -50, delay);
+    anim_x_fade_in(ac_speed, 100, 50, delay);
+
 }
 
-/**
- * @todo
- *      - 绘制ac page
- *            摆风（上下/左右）
- *      - 整理fan_page代码
- */
+void ac_page_anim_out(uint32_t delay){
+    // anim_y_fade_out(ac_title, lv_obj_get_y(ac_title), -50, delay,lv_obj_del_anim_ready_cb);
+    anim_y_fade_out(ac_return, 15, -50, delay);
+
+    anim_y_fade_out(ac_switch, -30, -100, delay);
+
+    anim_step_out(ac_arc, 200);
+    anim_step_out(ac_add, 200);
+    anim_step_out(ac_cut, 200);
+    anim_step_out(text_temp, 200);
+
+    anim_x_fade_out(ac_timing, -50, -100, delay);
+    anim_x_fade_out(ac_speed, 50, 100, delay);
+}
+
+
+
+/*************************
+ *        页面API
+ *************************/
+
+void ac_page_hide_obj(void){
+    lv_obj_add_flag(ac_return, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ac_switch, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ac_timing, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ac_speed, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ac_arc, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ac_add, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ac_cut, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(text_temp, LV_OBJ_FLAG_HIDDEN);
+}
+
+void ac_page_create_obj(void){
+    create_ac_arc();
+    create_ac_btn();
+
+    ac_page_hide_obj();
+}

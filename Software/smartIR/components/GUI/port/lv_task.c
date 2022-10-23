@@ -18,7 +18,12 @@
 #include "lvgl.h"
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
+
 #include "main_page.h"
+#include "fan_page.h"
+#include "ac_page.h"
+#include "info_page.h"
+#include "ctrl_page.h"
 #include "lv_common.h"
 
 #define TAG "lv_task"
@@ -53,7 +58,16 @@ static void guiTask(void *pvParameter){
     
     //my gui
     bg_page();
-    show_main_page();
+    lv_init_btn_style();
+    init_custom_btn_style();
+
+    main_page_create_obj();
+    info_page_create_obj();
+    ac_page_create_obj();
+    fan_page_create_obj();
+    ctrl_page_create_obj();
+
+    main_page_anim_in(200);
     
     while (1)
     {

@@ -12,14 +12,16 @@ void bg_page(void){
     lv_obj_set_style_bg_opa(bg_screen,LV_OPA_COVER,0);
     lv_obj_set_style_bg_color(bg_screen, BG_COLOR, 0);
     lv_obj_center(bg_screen);
-    // bg_screen = lv_scr_act();
-    // lv_obj_set_style_bg_color(bg_screen,BG_COLOR,0);
 }
 
 //----------------------style----------------------------//
 lv_style_t style_btn_pressed;
 lv_style_t style_return_btn_default;
 lv_style_t style_outline_focused;
+
+lv_style_t style_btn;
+lv_style_t style_btn_pr;
+
 
 void lv_init_btn_style(void){
     /* border,按下效果 */
@@ -52,6 +54,25 @@ void lv_init_btn_style(void){
     lv_style_set_outline_pad(&style_outline_focused, 5);
 }
 
+
+/* 初始化自定义button style */
+void init_custom_btn_style(void){
+    /* default style */
+    lv_style_init(&style_btn);
+    lv_style_set_radius(&style_btn, 7);             //背景圆角
+    lv_style_set_bg_color(&style_btn, BTNBG_COLOR); //按钮背景颜色
+    lv_style_set_bg_opa(&style_btn, LV_OPA_COVER);  //无不透明
+
+    lv_style_set_border_width(&style_btn, 0);       //无边框
+    lv_style_set_outline_width(&style_btn, 0);      //无外框
+    lv_style_set_shadow_width(&style_btn, 0);       //无阴影
+
+    /* pressed style */
+    lv_style_init(&style_btn_pr);
+    lv_style_set_bg_color(&style_btn_pr, lv_color_black());     //纯黑背景
+}
+
+
 //----------------------func-----------------------------//
 /* 创建图像按钮 */
 lv_obj_t * create_click_imgbtn(lv_obj_t * parent, lv_event_cb_t event_cb, lv_align_t align, lv_coord_t x_ofs, lv_coord_t y_ofs){
@@ -83,5 +104,28 @@ lv_obj_t * create_text_btn(lv_obj_t * parent){
     lv_obj_set_size(obj, 60, 40);
 
     return obj;
+}
+
+/**
+ * @brief 创建一个自定义风格的按钮, text需要自带颜色
+ * 
+ */
+lv_obj_t * lv_create_button_c(lv_obj_t * parent, lv_coord_t size_w, lv_coord_t size_h, lv_align_t align, lv_coord_t x, lv_coord_t y, lv_event_cb_t cb, const char *text){
+    lv_obj_t * btn_obj = lv_btn_create(parent);
+    lv_obj_remove_style_all(btn_obj);
+
+    lv_obj_add_style(btn_obj, &style_btn, LV_STATE_DEFAULT);
+    lv_obj_add_style(btn_obj, &style_btn_pr, LV_STATE_PRESSED);
+
+    lv_obj_set_size(btn_obj, size_w, size_h);
+    lv_obj_align(btn_obj, align, x, y);
+
+    lv_obj_add_event_cb(btn_obj, cb, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_t * info_label = lv_label_create(btn_obj);
+    lv_label_set_recolor(info_label, true);
+    lv_label_set_text(info_label, text);
+    lv_obj_align(info_label, LV_ALIGN_TOP_LEFT, 5, 5);
+    return btn_obj;
 }
 
