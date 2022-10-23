@@ -71,9 +71,9 @@ void app_main(void)
 
 /**
  * @todo
- *      梳理rtos层架构
- *      lv显示axp173 信息界面
- *      lv 和 编码器
+ *      使用 任务通知 使用LED和motor， motor要提示 充电完成、电池剩余电量不足等。。
+ *      
+ *      
  */
 
 
