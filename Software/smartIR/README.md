@@ -13,7 +13,6 @@
 - [x] lv8.2+driver测试
 - [ ] encoder+button
   - [x] 使用pcnt
-  - [ ] 
 - [ ] buzz+led
   - [ ] ~~det402无源蜂鸣器，pwm 2-5khz(2k)，使用中断~~
   - [x] led(todo：重构)
@@ -34,6 +33,7 @@
 
 
 
-## Todo（可能做也可能不做）
+## 开发日志
 
-- [ ] homekit
+> - [2022.10.23] 使用新UI
+
