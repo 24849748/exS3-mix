@@ -1,9 +1,11 @@
+// #include <stdio.h>
 #include "fan_page.h"
 #include "main_page.h"
 #include "anim.h"
 #include "lv_common.h"
-#include <stdio.h>
+
 #include "esp_log.h"
+
 #define TAG "fan_page"
 
 

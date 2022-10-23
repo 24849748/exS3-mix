@@ -1,8 +1,10 @@
+// #include <stdio.h>
 #include "ac_page.h"
+
 #include "main_page.h"
 #include "lv_common.h"
-#include <stdio.h>
 #include "anim.h"
+
 #include "esp_log.h"
 
 #define TAG "ac_page"
@@ -43,8 +45,8 @@ void ac_page_anim_in(uint32_t delay){
 }
 
 void ac_page_anim_out(uint32_t delay){
-    anim_y_fade_out(ac_title, lv_obj_get_y(ac_title), -50, delay,lv_obj_del_anim_ready_cb);
-    anim_y_fade_out(ac_return, lv_obj_get_y(ac_return), -50, delay,lv_obj_del_anim_ready_cb);
+    anim_y_fade_out(ac_title, lv_obj_get_y(ac_title), -50, delay, lv_obj_del_anim_ready_cb);
+    anim_y_fade_out(ac_return, lv_obj_get_y(ac_return), -50, delay, lv_obj_del_anim_ready_cb);
 
     anim_y_fade_out(ac_switch, -30, -100, delay, lv_obj_del_anim_ready_cb);
 

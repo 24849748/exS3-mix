@@ -1,8 +1,9 @@
 #include "setting_page.h"
-// #include "bg_page.h"
 #include "main_page.h"
+
 #include "lv_common.h"
 #include "anim.h"
+
 #include "esp_log.h"
 #define TAG "setting_page"
 

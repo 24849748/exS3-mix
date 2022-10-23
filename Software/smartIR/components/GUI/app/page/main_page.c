@@ -1,13 +1,14 @@
+// #include <stdio.h>
 #include "main_page.h"
 #include "fan_page.h"
 #include "setting_page.h"
 #include "ac_page.h"
+
 #include "anim.h"
 #include "lv_common.h"
-#include <stdio.h>
-
 
 #include "esp_log.h"
+
 #define TAG "main_page"
 
 

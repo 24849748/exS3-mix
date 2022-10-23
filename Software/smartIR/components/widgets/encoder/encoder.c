@@ -34,10 +34,10 @@ void encoder_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data){
 }
 
 
-static void encoder_handler(void){
-    encoder_diff += 0;
-    encoder_state = LV_INDEV_STATE_REL;
-}
+// static void encoder_handler(void){
+//     encoder_diff += 0;
+//     encoder_state = LV_INDEV_STATE_REL;
+// }
 
 void encoder_test(void){
     encoder_init();
