@@ -19,6 +19,7 @@
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
 
+/* GUI page */
 #include "main_page.h"
 #include "fan_page.h"
 #include "ac_page.h"

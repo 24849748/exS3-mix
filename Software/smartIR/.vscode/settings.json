@@ -38,6 +38,12 @@
         "pcnt.h": "c",
         "random": "c",
         "axp173.h": "c",
-        "lv_common.h": "c"
+        "lv_common.h": "c",
+        "widgets_conf.h": "c",
+        "esp_timer.h": "c",
+        "stdlib.h": "c",
+        "bitset": "c",
+        "chrono": "c",
+        "algorithm": "c"
     }
 }

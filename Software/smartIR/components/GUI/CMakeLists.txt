@@ -19,4 +19,4 @@ idf_component_register(
         ${GUI_ROOT_DIR}/app/page
         ${GUI_ROOT_DIR}/app/anim
     REQUIRES 
-        lvgl lvgl_drivers)
+        lvgl lvgl_drivers widgets)

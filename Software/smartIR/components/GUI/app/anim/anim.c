@@ -80,7 +80,7 @@ void anim_x_fade_in(lv_obj_t *obj, int32_t start, int32_t end, uint32_t delay){
     lv_anim_set_values(&a, start, end);
     lv_anim_set_time(&a, 400);
     lv_anim_set_delay(&a, delay);
-    lv_anim_set_exec_cb(&a, lv_obj_set_x);
+    lv_anim_set_exec_cb(&a, anim_x_cb);
     lv_anim_set_ready_cb(&a, lv_obj_show_anim_ready_cb);
     lv_anim_set_path_cb(&a, lv_anim_path_ease_in_out);
     lv_anim_start(&a);
@@ -101,7 +101,7 @@ void anim_x_fade_out(lv_obj_t *obj, int32_t start, int32_t end, uint32_t delay){
     lv_anim_set_values(&a, start, end);
     lv_anim_set_time(&a, 400);
     lv_anim_set_delay(&a, delay);
-    lv_anim_set_exec_cb(&a, lv_obj_set_x);
+    lv_anim_set_exec_cb(&a, anim_x_cb);
     lv_anim_set_ready_cb(&a, lv_obj_hide_anim_ready_cb);
     lv_anim_set_path_cb(&a, lv_anim_path_ease_in_out);
     lv_anim_start(&a);
@@ -123,7 +123,7 @@ void anim_y_fade_in(lv_obj_t *obj, int32_t start, int32_t end, uint32_t delay){
     lv_anim_set_values(&a, start, end);
     lv_anim_set_time(&a, 400);
     lv_anim_set_delay(&a, delay);
-    lv_anim_set_exec_cb(&a, lv_obj_set_y);
+    lv_anim_set_exec_cb(&a, anim_y_cb);
     lv_anim_set_ready_cb(&a, lv_obj_show_anim_ready_cb);
     lv_anim_set_path_cb(&a, lv_anim_path_ease_in_out);
     lv_anim_start(&a);
@@ -143,7 +143,7 @@ void anim_y_fade_out(lv_obj_t *obj, int32_t start, int32_t end, uint32_t delay){
     lv_anim_set_values(&a, start, end);
     lv_anim_set_time(&a, 400);
     lv_anim_set_delay(&a, delay);
-    lv_anim_set_exec_cb(&a, lv_obj_set_y);
+    lv_anim_set_exec_cb(&a, anim_y_cb);
     lv_anim_set_ready_cb(&a, lv_obj_hide_anim_ready_cb);
     lv_anim_set_path_cb(&a, lv_anim_path_ease_in_out);
     lv_anim_start(&a);

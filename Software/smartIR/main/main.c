@@ -11,7 +11,7 @@
 #include "i2c_bus.h"
 #include "lv_task.h"
 
-#include "encoder.h"
+
 #include "axp173.h"
 #include "vmotor.h"
 
@@ -56,11 +56,10 @@ void app_main(void)
 
     lv_create_task();
     
+
     vmotor_on(38);
     vTaskDelay(pdMS_TO_TICKS(500));
     vmotor_off(38);
-    // encoder_create_task();
-    // encoder_test();
 
 
     rtos_debug();
@@ -72,7 +71,7 @@ void app_main(void)
 /**
  * @todo
  *      使用 任务通知 使用LED和motor， motor要提示 充电完成、电池剩余电量不足等。。
- *      
+ *      以GoButton写一个c的驱动
  *      
  */
 
