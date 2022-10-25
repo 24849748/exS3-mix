@@ -4,6 +4,9 @@
 #include "lv_common.h"
 #include "esp_log.h"
 
+#include "led.h"
+#include "motor.h"
+
 #define TAG "ctrl_page"
 
 #define CTRL_RETURN_Y 15
@@ -29,6 +32,7 @@ static void btn_led_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
         LEDstatus = !LEDstatus;
+        led_set(PIN_LED, LEDstatus);
         ESP_LOGI(TAG, "LED:%s\n",LEDstatus?"open":"close");
     }
 }
@@ -36,6 +40,7 @@ static void btn_motor_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
         MOTORstatus = !MOTORstatus;
+        motor_set(PIN_MOTOR, MOTORstatus);
         ESP_LOGI(TAG, "Motor:%s\n",MOTORstatus?"open":"close");
     }
 }
