@@ -190,7 +190,7 @@ esp_err_t axp173_bat_301525_setting(void){
     axp_set_charge_target_volt(VOLT_CHARGE_TARGET_4V2);
     axp_set_charge_current(CHARGE_CURRENT_mA_100);
     axp_set_charge_end_current(0);
-
+    return ESP_OK;
 }
 
 

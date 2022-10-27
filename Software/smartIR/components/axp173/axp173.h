@@ -304,7 +304,7 @@ esp_err_t axp_get_discharge_coulomb_count(int32_t *discharge_count);
 
 //预设置
 esp_err_t apx173_default_setting(void);
-
+esp_err_t axp173_bat_301525_setting(void);
 
 
 #if 0
