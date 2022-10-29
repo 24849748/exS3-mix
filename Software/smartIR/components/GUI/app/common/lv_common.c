@@ -19,8 +19,10 @@ lv_style_t style_btn_pressed;
 lv_style_t style_return_btn_default;
 lv_style_t style_outline_focused;
 
-lv_style_t style_btn;
-lv_style_t style_btn_pr;
+lv_style_t style_btn;       //btn default style
+lv_style_t style_btn_pr;    //pressed style
+
+lv_style_t style_font;      //font style
 
 
 void lv_init_btn_style(void){
@@ -70,6 +72,10 @@ void init_custom_btn_style(void){
     /* pressed style */
     lv_style_init(&style_btn_pr);
     lv_style_set_bg_color(&style_btn_pr, lv_color_black());     //纯黑背景
+
+    /* font style */
+    lv_style_init(&style_font);
+    lv_style_set_text_color(&style_font, lv_color_white());
 }
 
 

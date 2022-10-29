@@ -44,6 +44,12 @@
         "stdlib.h": "c",
         "bitset": "c",
         "chrono": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "motor.h": "c",
+        "*.inc": "c",
+        "axp.h": "c",
+        "esp_system.h": "c",
+        "string": "c",
+        "string_view": "c"
     }
 }

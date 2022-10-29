@@ -31,6 +31,7 @@ extern lv_style_t style_outline_focused;
 
 extern lv_style_t style_btn;
 extern lv_style_t style_btn_pr;
+extern lv_style_t style_font; 
 
 
 void lv_init_btn_style(void);

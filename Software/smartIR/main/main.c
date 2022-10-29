@@ -13,7 +13,7 @@
 
 
 #include "axp173.h"
-#include "vmotor.h"
+#include "motor.h"
 
 #include "esp_log.h"
 #define TAG "main"
@@ -47,19 +47,18 @@ void rtos_debug(void){
 void app_main(void)
 {   
     // int count;
-    led_init(1, 1);
-    vmotor_init(38, 0);
+    led_init(PIN_LED, 0);
+    motor_init(PIN_MOTOR, 0);
 
     i2c_bus_init(I2C_NUM_0);
-    
-    // axp = axp173_create(I2C_NUM_0, AXP173_I2C_ADDR);
+    axp_init(I2C_NUM_0, AXP173_I2C_ADDR);
 
     lv_create_task();
     
 
-    vmotor_on(38);
-    vTaskDelay(pdMS_TO_TICKS(500));
-    vmotor_off(38);
+    motor_on(PIN_MOTOR);
+    vTaskDelay(pdMS_TO_TICKS(200));
+    motor_off(PIN_MOTOR);
 
 
     rtos_debug();
