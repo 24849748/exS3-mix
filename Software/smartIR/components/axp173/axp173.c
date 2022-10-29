@@ -135,8 +135,8 @@ esp_err_t apx173_default_setting(void){
     axp_set_VOFF_volt(VOFF_VOLT_2V9);
 
     //VBUS限压控制
-    axp_set_VHOLD_volt(VHOLD_VOLT_4V4);
     axp_VHOLD_enable(1);
+    axp_set_VHOLD_volt(VHOLD_VOLT_4V4);
 
     // //启动充电功能
     // axp_charge_enable(1);
@@ -157,11 +157,21 @@ esp_err_t apx173_default_setting(void){
     //电池、VBUS adc使能
     axp_enable_adc(ADC_ENABLE_BIT_BAT_VOLT, 1); 
     axp_enable_adc(ADC_ENABLE_BIT_VBUS_VOLT, 1); 
+    axp_enable_adc(ADC_ENABLE_BIT_BAT_CURRENT, 1);
+    axp_enable_adc(ADC_ENABLE_BIT_VBUS_CURRENT, 1);
+    axp_enable_adc(ADC_ENABLE_BIT_TS, 1);
+
+    //TS 引脚
+    // axp_set_TS_PIN_output_Current(TS_CURRENT_20uA);
+    // axp_set_TS_PIN_Current_output_way(C_OUTPUT_WAY_SAMPLING);
+    // axp_select_TS_PIN_function(1);
 
 
     //读取一次电压
-    axp_get_bat_volt(&bat_volt);
-    axp_get_VBUS_volt(&VBUS_volt);
+    // axp_get_bat_volt(&bat_volt);
+    // axp_get_VBUS_volt(&VBUS_volt);
+    bat_volt = axp_get_bat_volt();
+    VBUS_volt = axp_get_VBUS_volt();
 
     ESP_LOGI(TAG, "AXP173 init over!");
     ESP_LOGI(TAG, "BAT volt: %.2f  VBUS volt: %.2f",bat_volt, VBUS_volt);
@@ -206,53 +216,111 @@ esp_err_t axp_enable_adc(adc_enable_t adc_bit, uint8_t enable){
 }
 
 /**
- * @brief 读取电池电压
+ * @brief 读取电池电压(√)
  * 
- * @param volt 电压返回值
- * @return esp_err_t 
+ * @return float 电压返回值,单位V
  */
-esp_err_t axp_get_bat_volt(float *volt){
+float axp_get_bat_volt(void){
     uint8_t tmp[2];
-    float sen;
-    esp_err_t ret;
+    float sen, volt;
 
     /* 1.1mV per LSB */
     sen = 1.1 / 1000;
-    ret = axp_read_bytes(AXP173_BAT_VOLTAGE, tmp, 2);
+    esp_err_t ret = axp_read_bytes(AXP173_BAT_VOLTAGE, tmp, 2);
     AXP173_CHECK(ret == ESP_OK, "bus read bytes error", ESP_FAIL);
 
-    *volt = (((tmp[0] << 4) + tmp[1]) * sen);
+    volt = (((tmp[0] << 4) + tmp[1]) * sen);
     // ESP_LOGI(TAG, "Read bat volt raw: %d", ((tmp[0] << 8) + tmp[1]));
 
-    ESP_LOGI(TAG, "Read bat volt: %.2f V", *volt);
-    return ret;
+    ESP_LOGI(TAG, "Read bat volt: %.2f V", volt);
+    return volt;
+}
+
+int32_t axp_get_bat_pct(void){
+    // int32_t ret_pct;
+    // float volt;
+    // volt = axp_get_bat_volt();
+
+    return (int32_t)((4.2/axp_get_bat_volt())*100);
 }
 
 /**
- * @brief 读取VBUS电压
+ * @brief 读取电池放电电流(√)
  * 
- * @param volt 电压返回值
- * @return esp_err_t 
+ * @return float 电流，单位mA
  */
-esp_err_t axp_get_VBUS_volt(float *volt){
-    uint8_t tmp[2];
-    float sen;
-    esp_err_t ret;
+float axp_get_bat_discharge_current(void){
+    uint8_t data[2];
+    float step, current;
 
-    sen = 1.7 / 1000;
-    ret = axp_read_bytes(AXP173_VBUS_VOLTAGE, tmp, 2);
+    step = 0.5;      //0.5mA per step
+
+    esp_err_t ret = axp_read_bytes(AXP173_DISCHARGE_COULOMB, data, 2);
     AXP173_CHECK(ret == ESP_OK, "bus read bytes error", ESP_FAIL);
 
-    *volt = (((tmp[0] << 4) + tmp[1]) * sen);
-
-    // *volt = (((tmp[0] << 16) + (tmp[1] << 8) + tmp[2]) * sen);
-    // ESP_LOGI(TAG, "Read VBUS volt raw: %d", ((tmp[0] << 8) + tmp[1]));
-    ESP_LOGI(TAG, "Read VBUS volt: %.2f V", *volt);
-    return ret;
+    current = (((data[0] << 5) | data[1]) * step);
+    ESP_LOGI(TAG, "Bat discharge current: %.1f mA", current);
+    return current;
 }
 
 /**
- * @brief 读取有关电池的状态，存储在 axp173_bat_info_t 结构体中
+ * @brief 读取电池充电电流(√)
+ * 
+ * @return float 电流，单位mA
+ */
+float axp_get_bat_charge_current(void){
+    uint8_t data[2];
+    float step, current;
+    step = 0.5;      //0.5mA per step
+
+    esp_err_t ret = axp_read_bytes(AXP173_CHARGE_CURREN, data, 2);
+    AXP173_CHECK(ret == ESP_OK, "bus read bytes error", ESP_FAIL);
+
+    current = (((data[0] << 5) | data[1]) * step);
+    ESP_LOGI(TAG, "Bat charge current: %.1f mA", current);
+    return current;
+}
+
+
+/**
+ * @brief 读取VBUS电压(√)
+ * 
+ * @return float 电压返回值，单位V
+ */
+float axp_get_VBUS_volt(void){
+    uint8_t tmp[2];
+    float sen,volt;
+
+    sen = 1.7 / 1000;
+    esp_err_t ret = axp_read_bytes(AXP173_VBUS_VOLTAGE, tmp, 2);
+    AXP173_CHECK(ret == ESP_OK, "bus read bytes error", ESP_FAIL);
+
+    volt = (((tmp[0] << 4) + tmp[1]) * sen);
+
+    ESP_LOGI(TAG, "Read VBUS volt: %.2f V", volt);
+    return volt;
+}
+
+/**
+ * @brief 读取VBUS电流(√)
+ * 
+ * @return float 电流，单位mA
+ */
+float axp_get_VBUS_current(void){
+    uint8_t data[2];
+    float step, current;
+    step = 0.375;      //0.375mA per step
+
+    esp_err_t ret = axp_read_bytes(AXP173_VBUS_CURRENT, data, 2);
+    AXP173_CHECK(ret == ESP_OK, "bus read bytes error", ESP_FAIL);
+
+    current = (((data[0] << 4) | data[1]) * step);
+    ESP_LOGI(TAG, "VBUS current: %.2f mA", current);
+    return current;
+}
+
+/**
+ * @brief 读取有关电池的状态，存储在 axp173_bat_info_t 结构体中(√)
  * 
  * @param bat_info 
  * @return esp_err_t 
@@ -440,7 +508,7 @@ esp_err_t axp_shutdown(uint8_t shutdown){
 
 //充电控制1
 /**
- * @brief 充电功能使能控制，默认1
+ * @brief 充电功能使能控制，默认1(√)
  * 
  * @param enable    1->打开充电，0->关闭充电
  * @return esp_err_t 
@@ -450,13 +518,9 @@ esp_err_t axp_charge_enable(uint8_t enable){
 }
 
 /**
- * @brief 设置axp173充电目标电压，默认4.2V
+ * @brief 设置axp173充电目标电压，默认4.2V(√)
  * 
- * @param volt_select 
- *                  - 0 -> 4.1V
- *                  - 1 -> 4.15V
- *                  - 2 -> 4.2V
- *                  - 3 -> 4.36V
+ * @param volt_select 见VOLT_CHARGE_TARGET_...
  * @return esp_err_t 
  */
 esp_err_t axp_set_charge_target_volt(volt_charge_target_t volt_select){
@@ -492,7 +556,7 @@ esp_err_t axp_set_charge_current(charge_current_t current){
 
 
 /**
- * @brief AXP173 内部温度监测 ADC 使能
+ * @brief AXP173 内部温度监测 ADC 使能(√)
  * 
  * @param enable    1->打开，0->关闭
  * @return esp_err_t 
@@ -502,7 +566,27 @@ esp_err_t axp_internal_temperature_monitor_enable(uint8_t enable){
 }
 
 /**
- * @brief ADC 采样速率设置
+ * @brief 读取芯片内部温度(√)
+ * 
+ * @return float 芯片内部温度
+ */
+float axp_get_internal_temperature(void){
+    uint8_t tmp[2];
+    float ret_data;
+    float step = 0.1;
+
+    esp_err_t ret = axp_read_bytes(AXP173_TEMP, tmp, 2);
+    AXP173_CHECK(ret == ESP_OK, "bus read bytes error", ESP_FAIL);
+
+    ret_data = ((((tmp[0] << 4) + tmp[1]) * step)- 144.7);
+    // ESP_LOGI(TAG, "Read bat volt raw: %d", ((tmp[0] << 8) + tmp[1]));
+
+    ESP_LOGI(TAG, "Read inter temp: %.1f *C", ret_data);
+    return ret_data;
+}
+
+/**
+ * @brief ADC 采样速率设置(√)
  * 
  * @param freq_select  采样速率n（25*2^n）
  *                   - 0 : 25Hz， 
@@ -518,23 +602,23 @@ esp_err_t axp_set_ADC_sampling_freq(adc_freq_t freq_select){
 /**
  * @brief TS 管脚输出电流设置
  * 
- * @param Current_select    输出电流
+ * @param Current_select    输出电流，见TS_CURRENT_...
  *                      (0 : 20uA； 1 : 40uA； 2 : 60uA； 3 : 80uA)
  *                  
  * @return esp_err_t 
  */
-esp_err_t axp_set_TS_PIN_output_Current(uint8_t Current_select){
+esp_err_t axp_set_TS_PIN_output_Current(TS_output_current_t Current_select){
     return axp_write_bits(AXP173_ADC_RATE_TS_PIN, 4, 2, Current_select);
 }
 
 /**
  * @brief TS 管脚电流输出方式设置
  * 
- * @param way_select 电流输出方式
+ * @param way_select 电流输出方式，见C_OUTPUT_WAY_...
  *          (0:关闭;  1:充电时输出电流;  2:ADC 采样时输入可以省电;  3:一直打开)
  * @return esp_err_t 
  */
-esp_err_t axp_set_TS_PIN_Current_output_way(uint8_t way_select){
+esp_err_t axp_set_TS_PIN_Current_output_way(TS_current_output_way_t way_select){
     return axp_write_bits(AXP173_ADC_RATE_TS_PIN, 0, 2, way_select);
 }
 
@@ -546,6 +630,27 @@ esp_err_t axp_set_TS_PIN_Current_output_way(uint8_t way_select){
  */
 esp_err_t axp_select_TS_PIN_function(uint8_t func_select){
     return axp_write_bit(AXP173_ADC_RATE_TS_PIN, 2, func_select);
+}
+
+/**
+ * @brief 读取TS引脚的ADC数据(需要根据热敏电阻进一步计算)
+ * 
+ * @return float 
+ */
+float axp_get_TS_ADCdata(void){
+    uint8_t tmp[2];
+    float step, ret_data;
+
+    /* 0.8mV per LSB */
+    step = 0.8;
+    esp_err_t ret = axp_read_bytes(AXP173_TS_INPUT, tmp, 2);
+    AXP173_CHECK(ret == ESP_OK, "bus read bytes error", ESP_FAIL);
+
+    ret_data = (((tmp[0] << 4) + tmp[1]) * step);
+    // ESP_LOGI(TAG, "Read bat volt raw: %d", ((tmp[0] << 8) + tmp[1]));
+
+    ESP_LOGI(TAG, "Read TS data: %.1f mV ", ret_data);
+    return ret_data;
 }
 
 /**
@@ -589,6 +694,7 @@ esp_err_t axp_get_charge_coulomb_count(int32_t *charge_count){
     
     return ret;
 }
+
 
 /**
  * @brief 获取 电池 放电库仑计 数据
@@ -703,6 +809,8 @@ uint8_t voltToBin_100mV(float volt){
  * 中断，当无中断事件时，IRQ 输出拉高(通过外部上拉 51K 电阻)。
  * 每个中断都可以通过中断控制寄存器来屏蔽(参见寄存器 REG40H、
  * 寄存器 REG41H、寄存器 REG42H、寄存器REG43H)。
+ * 
+ *  1mA = 3.6coulomb
  */
 
 

@@ -175,26 +175,6 @@ typedef enum {
     VOLT_CHARGE_TARGET_4V36,    // 4.36V
 } volt_charge_target_t;
 
-// /* LDO2 LDO3输出电压 */
-// typedef enum {
-//     VOLT_LDO23_1V8,
-//     VOLT_LDO23_1V9,
-//     VOLT_LDO23_2V,
-//     VOLT_LDO23_2V1,
-//     VOLT_LDO23_2V2,
-//     VOLT_LDO23_2V3,
-//     VOLT_LDO23_2V4,
-//     VOLT_LDO23_2V5,
-//     VOLT_LDO23_2V6,
-//     VOLT_LDO23_2V7,
-//     VOLT_LDO23_2V8,
-//     VOLT_LDO23_2V9,
-//     VOLT_LDO23_3V,
-//     VOLT_LDO23_3V1,
-//     VOLT_LDO23_3V2,
-//     VOLT_LDO23_3V3,
-// } volt_ldo23_t;
-
 /* 长按关机时间 */
 typedef enum {
     SHUTDOWN_TIME_4S,
@@ -210,6 +190,22 @@ typedef enum {
     LONGPRESS_TIME_2S,  //2s
     LONGPRESS_TIME_2S5, //2.5s
 } longPress_time_t;
+
+/*  */
+typedef enum {
+    TS_CURRENT_20uA,
+    TS_CURRENT_40uA,
+    TS_CURRENT_60uA,
+    TS_CURRENT_80uA,
+} TS_output_current_t;
+
+/* TS pin 电流输出方式 */
+typedef enum {
+    C_OUTPUT_WAY_CLOSE,     // 关闭
+    C_OUTPUT_WAY_CHARGE,    // 充电时
+    C_OUTPUT_WAY_SAMPLING,  // ADC 采样时
+    C_OUTPUT_WAY_ALWAYS,    // 一直打开
+} TS_current_output_way_t;   
 
 
 
@@ -230,75 +226,73 @@ typedef struct{
 }axp173_bat_info_t;
 
 
+
 esp_err_t axp_init(i2c_port_t port, uint8_t addr);
-
 // axp173_handle_t axp173_create(i2c_port_t port, uint8_t addr);
-
 // esp_err_t axp173_delete(axp173_handle_t *axp173);
 
+
+// ADC相关
 esp_err_t axp_enable_adc(adc_enable_t adc_bit, uint8_t enable);
+esp_err_t axp_set_ADC_sampling_freq(adc_freq_t freq_select);
 
-esp_err_t axp_get_bat_volt(float *volt);
 
-esp_err_t axp_get_VBUS_volt(float *volt);
 
-esp_err_t axp_get_bat_status(axp173_bat_info_t *bat_info);
+// 电池相关、状态读取相关
+float axp_get_bat_volt(void);
+float axp_get_bat_discharge_current(void);
+float axp_get_bat_charge_current(void);
+int32_t axp_get_bat_pct(void);
+esp_err_t axp_get_bat_status(axp173_bat_info_t *bat_info);      //电池状态
 
+float axp_get_VBUS_volt(void);
+float axp_get_VBUS_current(void);
+
+
+// 充电控制
+esp_err_t axp_charge_enable(uint8_t enable);
+esp_err_t axp_set_charge_target_volt(volt_charge_target_t volt_select);
+esp_err_t axp_set_charge_end_current(uint8_t end_current);
+esp_err_t axp_set_charge_current(charge_current_t current);
+
+// 电源通道参数设置
 esp_err_t axp_power_output_ctrl(output_switch_t ctrl_bit, uint8_t enable);
-
 esp_err_t axp_set_DC2_volt(float volt);
-
 esp_err_t axp_set_DC1_volt(float volt);
-
 esp_err_t axp_set_LDO4_volt(float volt);
-
 esp_err_t axp_set_LDO2_volt(float volt);
-
 esp_err_t axp_set_LDO3_volt(float volt);
 
 
 /* ================以下未测试==================== */
 
 esp_err_t axp_VHOLD_enable(uint8_t enable);
-
 esp_err_t axp_set_VHOLD_volt(volt_vhold_t volt_select);
-
 esp_err_t axp_set_VOFF_volt(volt_voff_t volt_select);
 
+// PEK按键功能相关
 esp_err_t axp_shutdown(uint8_t shutdown);
-
-esp_err_t axp_charge_enable(uint8_t enable);
-
-esp_err_t axp_set_charge_target_volt(volt_charge_target_t volt_select);
-
-esp_err_t axp_set_charge_end_current(uint8_t end_current);
-
-esp_err_t axp_set_charge_current(charge_current_t current);
-
-esp_err_t axp_internal_temperature_monitor_enable(uint8_t enable);
-
-esp_err_t axp_set_ADC_sampling_freq(adc_freq_t freq_select);
-
-esp_err_t axp_set_TS_PIN_output_Current(uint8_t Current_select);
-
-esp_err_t axp_set_TS_PIN_Current_output_way(uint8_t way_select);
-
-esp_err_t axp_select_TS_PIN_function(uint8_t func_select);
-
 esp_err_t axp_set_shutdown_time(shutdown_time_t time);
-
 esp_err_t axp_set_longPress_time(longPress_time_t time);
 
 
-//库仑计相关
+// 其他温度相关
+esp_err_t axp_internal_temperature_monitor_enable(uint8_t enable);
+float axp_get_internal_temperature(void);
+
+
+// TS pin引脚设置
+esp_err_t axp_set_TS_PIN_output_Current(TS_output_current_t Current_select);
+esp_err_t axp_set_TS_PIN_Current_output_way(TS_current_output_way_t way_select);
+esp_err_t axp_select_TS_PIN_function(uint8_t func_select);
+float axp_get_TS_ADCdata(void);
+
+
+// 库仑计相关
 esp_err_t axp_coulomb_switch(uint8_t enable);
-
 esp_err_t axp_coulomb_counter_pause();
-
 esp_err_t axp_coulomb_counter_clear();
-
 esp_err_t axp_get_charge_coulomb_count(int32_t *charge_count);
-
 esp_err_t axp_get_discharge_coulomb_count(int32_t *discharge_count);
 
 
@@ -306,79 +300,6 @@ esp_err_t axp_get_discharge_coulomb_count(int32_t *discharge_count);
 esp_err_t apx173_default_setting(void);
 esp_err_t axp173_bat_301525_setting(void);
 
-
-#if 0
-axp173_handle_t axp173_create(i2c_port_t port, uint8_t addr);
-
-esp_err_t axp173_delete(axp173_handle_t *axp173);
-
-esp_err_t axp173_enable_adc(axp173_handle_t axp173, uint8_t adc_bit, uint8_t enable);
-
-esp_err_t axp173_get_bat_volt(axp173_handle_t axp173, float *volt);
-
-esp_err_t axp173_get_VBUS_volt(axp173_handle_t axp173, float *volt);
-
-esp_err_t axp173_get_bat_status(axp173_handle_t axp173, axp173_bat_info_t *bat_info);
-
-esp_err_t axp173_power_output_ctrl(axp173_handle_t axp173, uint8_t ctrl_bit, uint8_t enable);
-
-esp_err_t axp173_set_DC2_volt(axp173_handle_t axp173, float volt);
-
-esp_err_t axp173_set_DC1_volt(axp173_handle_t axp173, float volt);
-
-esp_err_t axp173_set_LDO4_volt(axp173_handle_t axp173, float volt);
-
-esp_err_t axp173_set_LDO2_volt(axp173_handle_t axp173, float volt);
-
-esp_err_t axp173_set_LDO3_volt(axp173_handle_t axp173, float volt);
-
-
-/* ================以下未测试==================== */
-
-esp_err_t axp173_VHOLD_enable(axp173_handle_t axp173, uint8_t enable);
-
-esp_err_t axp173_set_VHOLD_volt(axp173_handle_t axp173, uint8_t volt_select);
-
-esp_err_t axp173_set_VOFF_volt(axp173_handle_t axp173, uint8_t volt_select);
-
-esp_err_t axp173_shutdown(axp173_handle_t axp173, uint8_t shutdown);
-
-esp_err_t axp173_charge_enable(axp173_handle_t axp173, uint8_t enable);
-
-esp_err_t axp173_set_charge_target_volt(axp173_handle_t axp173, uint8_t volt_select);
-
-esp_err_t axp173_set_charge_end_current(axp173_handle_t axp173, uint8_t end_current);
-
-esp_err_t axp173_set_charge_current(axp173_handle_t axp173, uint8_t current);
-
-esp_err_t axp173_internal_temperature_monitor_enable(axp173_handle_t axp173, uint8_t enable);
-
-esp_err_t axp173_set_ADC_sampling_freq(axp173_handle_t axp173, uint8_t freq_select);
-
-esp_err_t axp173_set_TS_PIN_output_Current(axp173_handle_t axp173, uint8_t Current_select);
-
-esp_err_t axp173_set_TS_PIN_Current_output_way(axp173_handle_t axp173, uint8_t way_select);
-
-esp_err_t axp173_select_TS_PIN_function(axp173_handle_t axp173, uint8_t func_select);
-
-esp_err_t axp173_coulomb_switch(axp173_handle_t axp173, uint8_t enable);
-
-esp_err_t axp173_coulomb_counter_pause(axp173_handle_t axp173);
-
-esp_err_t axp173_coulomb_counter_clear(axp173_handle_t axp173);
-
-esp_err_t axp173_get_charge_coulomb_count(axp173_handle_t axp173, int32_t *charge_count);
-
-esp_err_t axp173_get_discharge_coulomb_count(axp173_handle_t axp173, int32_t *discharge_count);
-
-esp_err_t axp173_set_shutdown_time(axp173_handle_t axp173, shutdown_time_t time);
-
-esp_err_t axp173_set_longPress_time(axp173_handle_t axp173, longPress_time_t time);
-
-//预设置
-esp_err_t apx173_default_setting(axp173_handle_t axp173);
-
-#endif
 
 
 #endif
