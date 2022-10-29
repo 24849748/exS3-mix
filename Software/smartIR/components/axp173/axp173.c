@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include "esp_system.h"
 #include "driver/i2c.h"
-#include "esp_log.h"
+#include "axp173_reg.h"
 #include "i2c_bus.h"
+#include "esp_log.h"
 
 #define TAG "axp173"
 
@@ -16,8 +17,7 @@
         return (ret); \
     }
 
-
-axp173_dev_t axp;
+static axp173_dev_t axp; //隐藏设备
 
 
 static esp_err_t axp_read_bytes(uint8_t reg, uint8_t *data, size_t len);
@@ -28,8 +28,8 @@ static esp_err_t axp_write_bit(uint8_t reg, uint8_t bit_num, uint8_t data);
 static esp_err_t axp_write_bits(uint8_t reg, uint8_t bit_start, uint8_t bit_len, uint8_t data);
 
 /* calculate func */
-uint8_t voltToBin_25mV(float volt);
-uint8_t voltToBin_100mV(float volt);
+static uint8_t voltToBin_25mV(float volt);
+static uint8_t voltToBin_100mV(float volt);
 
 
 
@@ -37,6 +37,10 @@ uint8_t voltToBin_100mV(float volt);
 /* =========================================================== */
 /* -------------------- public func ----------------------- */
 
+
+/* ===================
+        初始化
+====================== */
 
 /**
  * @brief 初始化axp设备
@@ -51,17 +55,11 @@ esp_err_t axp_init(i2c_port_t port, uint8_t addr){
     axp.port = port;
 
     /* default setting */
-    apx173_default_setting();
+    apx173_defaultSetting();
 
     ESP_LOGI(TAG, "axp173 init over");
     return ESP_OK;
 }
-
-
-/* 改下面函数 */
-
-
-
 
 // /**
 //  * @brief 创建axp173设备，返回句柄
@@ -116,7 +114,7 @@ esp_err_t axp_init(i2c_port_t port, uint8_t addr){
  * 7.使能电池、VBUS 的ADC
  * @return esp_err_t 
  */
-esp_err_t apx173_default_setting(void){
+esp_err_t apx173_defaultSetting(void){
     float bat_volt = 0;
     float VBUS_volt = 0;
 
@@ -125,41 +123,39 @@ esp_err_t apx173_default_setting(void){
     axp_set_LDO4_volt(3.3);
 
     //打开通道输出 打开DCDC1，LDO4，关闭LDO23、DCDC2
-    axp_power_output_ctrl(OUTPUT_SW_DC1, 1);
-    axp_power_output_ctrl(OUTPUT_SW_LDO4, 1);
-    axp_power_output_ctrl(OUTPUT_SW_DC2, 0);
-    axp_power_output_ctrl(OUTPUT_SW_LDO2, 0);
-    axp_power_output_ctrl(OUTPUT_SW_LDO3, 0);
+    axp_output_channel_enable(OUTPUT_CH_DC1, 1);
+    axp_output_channel_enable(OUTPUT_CH_LDO4, 1);
+    axp_output_channel_enable(OUTPUT_CH_DC2, 0);
+    axp_output_channel_enable(OUTPUT_CH_LDO2, 0);
+    axp_output_channel_enable(OUTPUT_CH_LDO3, 0);
     
     //设置关机电压
-    axp_set_VOFF_volt(VOFF_VOLT_2V9);
+    axp_set_volt_VOFF(VOFF_VOLT_2V9);
+
+    // 长按时间2秒，长按自动关机，长按时间4秒
+    axp_write_byte(AXP173_PEK, 0b01101100);
 
     //VBUS限压控制
     axp_VHOLD_enable(1);
-    axp_set_VHOLD_volt(VHOLD_VOLT_4V4);
+    axp_set_volt_VHOLD(VHOLD_VOLT_4V4);
+    
+    // axp_autoShutdown_enable(true);
+    // axp_set_time_shutdown(SHUTDOWN_TIME_4S); //有问题
+    // axp_set_time_longPress(LONGPRESS_TIME_2S);
 
-    // //启动充电功能
-    // axp_charge_enable(1);
-
-    // //设置充电目标电压
-    // axp_set_charge_target_volt(VOLT_CHARGE_TARGET_4V2);
-
-    // //设置电池充电电流和结束电流
-    // axp_set_charge_current(CHARGE_CURRENT_mA_100);
-    // axp_set_charge_end_current(0);
     
     //301525电池默认设置
-    axp173_bat_301525_setting();
+    axp173_defaultSetting_301525();
 
     //设置adc采样率 25Hz
-    axp_set_ADC_sampling_freq(ADC_FREQ_25Hz);
+    axp_adc_set_sampling_freq(ADC_FREQ_25Hz);
 
     //电池、VBUS adc使能
-    axp_enable_adc(ADC_ENABLE_BIT_BAT_VOLT, 1); 
-    axp_enable_adc(ADC_ENABLE_BIT_VBUS_VOLT, 1); 
-    axp_enable_adc(ADC_ENABLE_BIT_BAT_CURRENT, 1);
-    axp_enable_adc(ADC_ENABLE_BIT_VBUS_CURRENT, 1);
-    axp_enable_adc(ADC_ENABLE_BIT_TS, 1);
+    axp_adc_enable(ADC_ENABLE_BIT_BAT_VOLT, 1); 
+    axp_adc_enable(ADC_ENABLE_BIT_VBUS_VOLT, 1); 
+    axp_adc_enable(ADC_ENABLE_BIT_BAT_CURRENT, 1);
+    axp_adc_enable(ADC_ENABLE_BIT_VBUS_CURRENT, 1);
+    axp_adc_enable(ADC_ENABLE_BIT_TS, 1);
 
     //TS 引脚
     // axp_set_TS_PIN_output_Current(TS_CURRENT_20uA);
@@ -176,9 +172,23 @@ esp_err_t apx173_default_setting(void){
     ESP_LOGI(TAG, "AXP173 init over!");
     ESP_LOGI(TAG, "BAT volt: %.2f  VBUS volt: %.2f",bat_volt, VBUS_volt);
 
+
     return ESP_OK;
 }
 
+
+/**
+ * @brief exS3使用的301525电池默认设置
+ * 
+ * @return esp_err_t 
+ */
+esp_err_t axp173_defaultSetting_301525(void){
+    // axp_set_VOFF_volt(VOFF_VOLT_2V7);
+    axp_charge_enable(1);
+    axp_set_volt_chargeTarget(VOLT_CHARGE_TARGET_4V2);
+    axp_set_current_charge(CHARGE_CURRENT_mA_100);
+    axp_set_current_chargeEnd(0);
+    return ESP_OK;
 /* 
 型号:301525
 容量：100MAH
@@ -194,14 +204,16 @@ esp_err_t apx173_default_setting(void){
 最大放电电流：1C
 保护IC参数: 过充电保护电压4.20V±0.05V ，过放电保护电压2.7V±0.1V,充许最大电流2A。
  */
-esp_err_t axp173_bat_301525_setting(void){
-    // axp_set_VOFF_volt(VOFF_VOLT_2V7);
-    axp_charge_enable(1);
-    axp_set_charge_target_volt(VOLT_CHARGE_TARGET_4V2);
-    axp_set_charge_current(CHARGE_CURRENT_mA_100);
-    axp_set_charge_end_current(0);
-    return ESP_OK;
 }
+
+
+
+
+
+/* ===================
+        ADC相关
+====================== */
+
 
 
 /**
@@ -211,9 +223,29 @@ esp_err_t axp173_bat_301525_setting(void){
  * @param enable    是否使能 1/0
  * @return esp_err_t 
  */
-esp_err_t axp_enable_adc(adc_enable_t adc_bit, uint8_t enable){
-    return axp_write_bit(AXP173_ADC_ENABLE_1, adc_bit, enable);
+esp_err_t axp_adc_enable(adc_enable_t adc_channel, uint8_t enable){
+    return axp_write_bit(AXP173_ADC_ENABLE_1, adc_channel, enable);
 }
+
+/**
+ * @brief ADC 采样速率设置(√)
+ * 
+ * @param freq_select  采样速率n（25*2^n）
+ *                   - 0 : 25Hz， 
+ *                   - 1 : 50Hz，
+ *                   - 2 : 100Hz，
+ *                   - 3 : 200Hz，
+ * @return esp_err_t 
+ */
+esp_err_t axp_adc_set_sampling_freq(adc_freq_t freq_select){
+    return axp_write_bits(AXP173_ADC_RATE_TS_PIN, 6, 2, freq_select);
+}
+
+
+/* ===================
+电池相关、状态读取相关
+====================== */
+
 
 /**
  * @brief 读取电池电压(√)
@@ -236,13 +268,6 @@ float axp_get_bat_volt(void){
     return volt;
 }
 
-int32_t axp_get_bat_pct(void){
-    // int32_t ret_pct;
-    // float volt;
-    // volt = axp_get_bat_volt();
-
-    return (int32_t)((4.2/axp_get_bat_volt())*100);
-}
 
 /**
  * @brief 读取电池放电电流(√)
@@ -283,6 +308,46 @@ float axp_get_bat_charge_current(void){
 
 
 /**
+ * @brief 获取电池百分比
+ * 
+ * @return int32_t 
+ */
+int32_t axp_get_bat_pct(void){
+    // int32_t ret_pct;
+    // float volt;
+    // volt = axp_get_bat_volt();
+
+    return (int32_t)((4.2/axp_get_bat_volt())*100);
+}
+
+
+/**
+ * @brief 读取有关电池的状态，存储在 axp173_bat_info_t 结构体中(√)
+ * 
+ * @param bat_info 
+ * @return esp_err_t 
+ */
+esp_err_t axp_get_bat_info(axp173_bat_info_t *bat_info){
+    esp_err_t ret;
+    uint8_t data;
+
+    ret = axp_read_byte(AXP173_POWER_STATUS, &data);
+    AXP173_CHECK(ret == ESP_OK, "read byte failed", ESP_FAIL);
+    bat_info->currentPath = (data & (1<<2)) ? true : false;
+
+    ret = axp_read_byte(AXP173_CHARGE_STATUS, &data);
+    AXP173_CHECK(ret == ESP_OK, "read byte failed", ESP_FAIL);
+    bat_info->overTemperature = (data & (1<<7)) ? true : false;
+    bat_info->isCharging = (data & (1<<6)) ? true : false;
+    bat_info->isExist = (data & (1<<5)) ? true : false;
+
+    ESP_LOGI(TAG, "battery info: charge[%d], currentPath[%d], exist[%d], temperature[%d]", bat_info->isCharging, bat_info->currentPath, bat_info->isExist, bat_info->overTemperature);
+
+    return ret;
+}
+
+
+/**
  * @brief 读取VBUS电压(√)
  * 
  * @return float 电压返回值，单位V
@@ -319,41 +384,71 @@ float axp_get_VBUS_current(void){
     return current;
 }
 
+
+/* ===================
+        充电控制
+====================== */
 /**
- * @brief 读取有关电池的状态，存储在 axp173_bat_info_t 结构体中(√)
+ * @brief 充电功能使能控制，默认1(√)
  * 
- * @param bat_info 
+ * @param enable    1->打开充电，0->关闭充电
  * @return esp_err_t 
  */
-esp_err_t axp_get_bat_status(axp173_bat_info_t *bat_info){
-    esp_err_t ret;
-    uint8_t data;
+esp_err_t axp_charge_enable(uint8_t enable){
+    return axp_write_bit(AXP173_CHARGE_CONTROL_1, 7, enable);
+}
 
-    ret = axp_read_byte(AXP173_POWER_STATUS, &data);
-    AXP173_CHECK(ret == ESP_OK, "read byte failed", ESP_FAIL);
-    bat_info->currentPath = (data & (1<<2)) ? true : false;
-
-    ret = axp_read_byte(AXP173_CHARGE_STATUS, &data);
-    AXP173_CHECK(ret == ESP_OK, "read byte failed", ESP_FAIL);
-    bat_info->overTemperature = (data & (1<<7)) ? true : false;
-    bat_info->isCharging = (data & (1<<6)) ? true : false;
-    bat_info->isExist = (data & (1<<5)) ? true : false;
-
-    ESP_LOGI(TAG, "battery info: charge[%d], currentPath[%d], exist[%d], temperature[%d]", bat_info->isCharging, bat_info->currentPath, bat_info->isExist, bat_info->overTemperature);
-
-    return ret;
+/**
+ * @brief 设置axp173充电目标电压，默认4.2V(√)
+ * 
+ * @param volt_select 见VOLT_CHARGE_TARGET_...
+ * @return esp_err_t 
+ */
+esp_err_t axp_set_volt_chargeTarget(volt_charge_target_t volt_select){
+    return axp_write_bits(AXP173_CHARGE_CONTROL_1, 5, 2, volt_select);
 }
 
 
 /**
- * @brief 电源输出通道开关
+ * @brief 设置axp173充电结束电流，默认0
  * 
- * @param ctrl_bit      控制哪个电源输出开关， 详见macro：OUTPUT_SW_..
+ * @param end_current 
+ *                  - 0 -> 充电电流小于 10%设置值时结束充电
+ *                  - 1 -> 充电电流小于 15%设置值时结束充电
+ *                  
+ * @return esp_err_t 
+ */
+esp_err_t axp_set_current_chargeEnd(uint8_t end_current){
+    return axp_write_bit(AXP173_CHARGE_CONTROL_1, 4, end_current);
+}
+
+/**
+ * @brief 设置axp173充电电流，默认0
+ * 
+ * @param current   充电电流，见enum: CHARGE_CURRENT_mA_..
+ *                  
+ * @return esp_err_t 
+ */
+esp_err_t axp_set_current_charge(charge_current_t current){
+    return axp_write_bits(AXP173_CHARGE_CONTROL_1, 0, 4, current);
+}
+
+
+
+
+/* ===================
+    电源通道设置
+====================== */
+
+/**
+ * @brief 电源输出通道使能
+ * 
+ * @param ctrl_bit      电源输出通道使能， 详见macro：OUTPUT_CH_..
  * @param enable        1->打开，0->关闭
  * @return esp_err_t 
  */
-esp_err_t axp_power_output_ctrl(output_switch_t ctrl_bit, uint8_t enable){
-    return axp_write_bit(AXP173_DC1_LDO234_SW, ctrl_bit, enable);
+esp_err_t axp_output_channel_enable(output_channel_t channel, uint8_t enable){
+    return axp_write_bit(AXP173_DC1_LDO234_SW, channel, enable);
 }
 
 /**
@@ -462,7 +557,9 @@ esp_err_t axp_set_LDO3_volt(float volt){
 
 
 
-
+/* ===================
+        VHOLD
+====================== */
 
 /* ================ 以下代码未测试 ==================== */
 /**
@@ -481,7 +578,7 @@ esp_err_t axp_VHOLD_enable(uint8_t enable){
  * @param volt_select  限压电压，见VHOLD_VOLT_...
  * @return esp_err_t 
  */
-esp_err_t axp_set_VHOLD_volt(volt_vhold_t volt_select){
+esp_err_t axp_set_volt_VHOLD(volt_vhold_t volt_select){
     return axp_write_bits(AXP173_VBUS_TO_IPSOUT, 3, 3, volt_select);
 }
 
@@ -491,10 +588,14 @@ esp_err_t axp_set_VHOLD_volt(volt_vhold_t volt_select){
  * @param volt_select   关机电压，见VOFF_VOLT_...
  * @return esp_err_t 
  */
-esp_err_t axp_set_VOFF_volt(volt_voff_t volt_select){
+esp_err_t axp_set_volt_VOFF(volt_voff_t volt_select){
     return axp_write_byte(AXP173_SHUTDOWN_VOLT, volt_select);
 }
 
+
+/* ===================
+        PEK按键
+====================== */
 
 /**
  * @brief 【FBI warning】关机控制
@@ -506,55 +607,39 @@ esp_err_t axp_shutdown(uint8_t shutdown){
     return axp_write_bit(AXP173_SHUTDOWN_BAT_CHGLED, 7, shutdown);
 }
 
-//充电控制1
-/**
- * @brief 充电功能使能控制，默认1(√)
- * 
- * @param enable    1->打开充电，0->关闭充电
- * @return esp_err_t 
- */
-esp_err_t axp_charge_enable(uint8_t enable){
-    return axp_write_bit(AXP173_CHARGE_CONTROL_1, 7, enable);
+esp_err_t axp_autoShutdown_enable(bool enable){
+    return axp_write_bit(AXP173_PEK, 3, (enable ? 1 : 0));
 }
 
 /**
- * @brief 设置axp173充电目标电压，默认4.2V(√)
+ * @brief 设置关机时间，长按PEK键时间，大于该值将关机
  * 
- * @param volt_select 见VOLT_CHARGE_TARGET_...
+ * @param axp173 
+ * @param time 
  * @return esp_err_t 
  */
-esp_err_t axp_set_charge_target_volt(volt_charge_target_t volt_select){
-    return axp_write_bits(AXP173_CHARGE_CONTROL_1, 5, 2, volt_select);
-}
-
-
-/**
- * @brief 设置axp173充电结束电流，默认0
- * 
- * @param end_current 
- *                  - 0 -> 充电电流小于 10%设置值时结束充电
- *                  - 1 -> 充电电流小于 15%设置值时结束充电
- *                  
- * @return esp_err_t 
- */
-esp_err_t axp_set_charge_end_current(uint8_t end_current){
-    return axp_write_bit(AXP173_CHARGE_CONTROL_1, 4, end_current);
+esp_err_t axp_set_time_shutdown(shutdown_time_t time){
+    return axp_write_bits(AXP173_PEK, 0, 2, time);
 }
 
 /**
- * @brief 设置axp173充电电流，默认0
+ * @brief 设置长按键时间
  * 
- * @param current   充电电流，见enum: CHARGE_CURRENT_mA_..
- *                  
+ * @param axp173 
+ * @param time 
  * @return esp_err_t 
  */
-esp_err_t axp_set_charge_current(charge_current_t current){
-    return axp_write_bits(AXP173_CHARGE_CONTROL_1, 0, 4, current);
+esp_err_t axp_set_time_longPress(longPress_time_t time){
+    return axp_write_bits(AXP173_PEK, 4, 2, time);
 }
 
 
 
 
+
+/* ===================
+        内部温度
+====================== */
 /**
  * @brief AXP173 内部温度监测 ADC 使能(√)
  * 
@@ -585,20 +670,13 @@ float axp_get_internal_temperature(void){
     return ret_data;
 }
 
-/**
- * @brief ADC 采样速率设置(√)
- * 
- * @param freq_select  采样速率n（25*2^n）
- *                   - 0 : 25Hz， 
- *                   - 1 : 50Hz，
- *                   - 2 : 100Hz，
- *                   - 3 : 200Hz，
- * @return esp_err_t 
- */
-esp_err_t axp_set_ADC_sampling_freq(adc_freq_t freq_select){
-    return axp_write_bits(AXP173_ADC_RATE_TS_PIN, 6, 2, freq_select);
-}
 
+
+
+
+/* ===================
+        TS引脚
+====================== */
 /**
  * @brief TS 管脚输出电流设置
  * 
@@ -607,8 +685,8 @@ esp_err_t axp_set_ADC_sampling_freq(adc_freq_t freq_select){
  *                  
  * @return esp_err_t 
  */
-esp_err_t axp_set_TS_PIN_output_Current(TS_output_current_t Current_select){
-    return axp_write_bits(AXP173_ADC_RATE_TS_PIN, 4, 2, Current_select);
+esp_err_t axp_set_current_TSoutput(TS_output_current_t current_select){
+    return axp_write_bits(AXP173_ADC_RATE_TS_PIN, 4, 2, current_select);
 }
 
 /**
@@ -618,7 +696,7 @@ esp_err_t axp_set_TS_PIN_output_Current(TS_output_current_t Current_select){
  *          (0:关闭;  1:充电时输出电流;  2:ADC 采样时输入可以省电;  3:一直打开)
  * @return esp_err_t 
  */
-esp_err_t axp_set_TS_PIN_Current_output_way(TS_current_output_way_t way_select){
+esp_err_t axp_set_currentOutputWay_TS(TS_current_output_way_t way_select){
     return axp_write_bits(AXP173_ADC_RATE_TS_PIN, 0, 2, way_select);
 }
 
@@ -628,7 +706,7 @@ esp_err_t axp_set_TS_PIN_Current_output_way(TS_current_output_way_t way_select){
  * @param func_select   0:电池温度监测功能，1:外部独立的 ADC 输入通路
  * @return esp_err_t 
  */
-esp_err_t axp_select_TS_PIN_function(uint8_t func_select){
+esp_err_t axp_set_function_TS(uint8_t func_select){
     return axp_write_bit(AXP173_ADC_RATE_TS_PIN, 2, func_select);
 }
 
@@ -637,7 +715,7 @@ esp_err_t axp_select_TS_PIN_function(uint8_t func_select){
  * 
  * @return float 
  */
-float axp_get_TS_ADCdata(void){
+float axp_get_adcData_TS(void){
     uint8_t tmp[2];
     float step, ret_data;
 
@@ -653,13 +731,20 @@ float axp_get_TS_ADCdata(void){
     return ret_data;
 }
 
+
+
+
+
+/* ===================
+        库仑计
+====================== */
 /**
  * @brief 库仑计开关控制
  * 
  * @param enable    1->open; 0->close; 默认0
  * @return esp_err_t 
  */
-esp_err_t axp_coulomb_switch(uint8_t enable){
+esp_err_t axp_coulomb_enable(uint8_t enable){
     return axp_write_bit(AXP173_COULOMB_COUNTER, 7, enable);
 }
 
@@ -687,7 +772,7 @@ esp_err_t axp_coulomb_counter_clear(){
  * @param charge_count  充电计数
  * @return esp_err_t 
  */
-esp_err_t axp_get_charge_coulomb_count(int32_t *charge_count){
+esp_err_t axp_get_coulombCount_charge(int32_t *charge_count){
     uint8_t data[4];
     esp_err_t ret = axp_read_bytes(AXP173_CHARGE_COULOMB, data, 4);
     *charge_count = (data[3]<<24 | data[2]<< 16 | data[1] << 8 | data[0]);
@@ -702,7 +787,7 @@ esp_err_t axp_get_charge_coulomb_count(int32_t *charge_count){
  * @param discharge_count 放电计数
  * @return esp_err_t 
  */
-esp_err_t axp_get_discharge_coulomb_count(int32_t *discharge_count){
+esp_err_t axp_get_coulombCount_discharge(int32_t *discharge_count){
     uint8_t data[4];
     esp_err_t ret = axp_read_bytes(AXP173_DISCHARGE_COULOMB, data, 4);
     *discharge_count = (data[3]<<24 | data[2]<< 16 | data[1] << 8 | data[0]);
@@ -710,27 +795,9 @@ esp_err_t axp_get_discharge_coulomb_count(int32_t *discharge_count){
     return ret;
 } 
 
-/**
- * @brief 设置关机时间，长按PEK键时间，大于该值将关机
- * 
- * @param axp173 
- * @param time 
- * @return esp_err_t 
- */
-esp_err_t axp_set_shutdown_time(shutdown_time_t time){
-    return axp_write_bits(AXP173_PEK, 0, 2, time);
-}
 
-/**
- * @brief 设置长按键时间
- * 
- * @param axp173 
- * @param time 
- * @return esp_err_t 
- */
-esp_err_t axp_set_longPress_time(longPress_time_t time){
-    return axp_write_bits(AXP173_PEK, 4, 2, time);
-}
+
+
 
 
 /* IRQ function */
@@ -797,8 +864,8 @@ uint8_t voltToBin_100mV(float volt){
 /**
  * @todo
  *      测试coulomb相关函数
- *      conf
  *      IRQ
+ *      代码格式化
  */
 
 
@@ -818,7 +885,6 @@ uint8_t voltToBin_100mV(float volt){
  * VBUS限流使能、设置限流电流
  * Sleep 模式下 PWRON 短按唤醒功能使能设置
  * CHGLED 管脚功能设置、CHGLED 管脚控制设置
- * REG 34H: 充电控制 2
  * REG 36H: PEK 按键参数设置
  * REG 37H: DC-DC 工作频率设置
  * REG 38H: VLTF-charge 电池充电低温门限设置

@@ -102,7 +102,7 @@ lv_obj_t * lv_create_info_label(lv_obj_t *parent, lv_coord_t y){
 void info_axp_update(void){
     float bat_volt; //读取电池电压
     axp173_bat_info_t bat_info;
-    axp_get_bat_status(&bat_info);
+    axp_get_bat_info(&bat_info);
     // axp_get_bat_volt(&bat_volt);
     bat_volt = axp_get_bat_volt();
 
@@ -137,7 +137,7 @@ void info_axp_update(void){
     //     lv_label_set_text_fmt(axp_info_percentage, " %d %%", bat_pct);
     // }
 
-    lv_label_set_text_fmt(axp_info_percentage, " %.2fV %.1fmA", axp_get_VBUS_volt(),axp_get_VBUS_current());
+    lv_label_set_text_fmt(axp_info_percentage, " %.2fV %.1fmA", axp_get_VBUS_volt(), axp_get_VBUS_current());
 
     /* 电流 */
     lv_label_set_text_fmt(axp_info_volt, "#50ec7b InC:%.1fmA# OutC:%.1fmA", axp_get_bat_charge_current(), axp_get_bat_discharge_current());
