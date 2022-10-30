@@ -75,8 +75,8 @@ esp_err_t axp_set_current_chargeEnd(uint8_t end_current);
 
 
 // 电源通道参数设置
-esp_err_t axp_output_channel_enable(output_channel_t channel, uint8_t enable);
-esp_err_t axp_set_channel_volt(float volt); //函数未实现，使用改函数取代下列几个函数
+esp_err_t axp_output_channel_enable(output_channel_t channel, bool enable);
+esp_err_t axp_set_channel_volt(output_channel_t channel, float volt);
 esp_err_t axp_set_DC2_volt(float volt);
 esp_err_t axp_set_DC1_volt(float volt);
 esp_err_t axp_set_LDO4_volt(float volt);

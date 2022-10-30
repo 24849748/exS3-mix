@@ -444,11 +444,43 @@ esp_err_t axp_set_current_charge(charge_current_t current){
  * @brief 电源输出通道使能
  * 
  * @param ctrl_bit      电源输出通道使能， 详见macro：OUTPUT_CH_..
- * @param enable        1->打开，0->关闭
+ * @param enable        true->打开，false->关闭
  * @return esp_err_t 
  */
-esp_err_t axp_output_channel_enable(output_channel_t channel, uint8_t enable){
-    return axp_write_bit(AXP173_DC1_LDO234_SW, channel, enable);
+esp_err_t axp_output_channel_enable(output_channel_t channel, bool enable){
+    return axp_write_bit(AXP173_DC1_LDO234_SW, channel, (enable?1:0));
+}
+
+/**
+ * @brief 
+ * 
+ * @param volt 
+ * @return esp_err_t 
+ */
+esp_err_t axp_set_channel_volt(output_channel_t channel, float volt){
+    switch (channel) {
+    case OUTPUT_CH_DC1:
+        // if(volt < 0.7 || volt > 3.5 ){
+        // ESP_LOGE(TAG, "invalid range, DCDC1 suppost voltage range: (0.7, 3.5)");
+        // break;
+        // }
+        // axp_write_byte(AXP173_DC1_VOLT, voltToBin_25mV(volt));
+        // break;
+        axp_set_DC1_volt(volt);
+        break;
+    case OUTPUT_CH_DC2:
+        axp_set_DC2_volt(volt);
+        break;
+    case OUTPUT_CH_LDO2:
+        axp_set_LDO2_volt(volt);
+        break;
+    case OUTPUT_CH_LDO3:
+        axp_set_LDO3_volt(volt);
+        break;
+    case OUTPUT_CH_LDO4:
+        axp_set_LDO4_volt(volt);
+        break;
+    }
 }
 
 /**
@@ -552,8 +584,6 @@ esp_err_t axp_set_LDO3_volt(float volt){
 
     return axp_write_byte(AXP173_LDO23_VOLT, merge_data);
 }
-
-
 
 
 
@@ -865,7 +895,6 @@ uint8_t voltToBin_100mV(float volt){
  * @todo
  *      测试coulomb相关函数
  *      IRQ
- *      代码格式化
  */
 
 
