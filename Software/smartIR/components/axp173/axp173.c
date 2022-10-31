@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "esp_system.h"
 #include "driver/i2c.h"
+#include "driver/gpio.h"
 #include "axp173_reg.h"
 #include "i2c_bus.h"
 #include "esp_log.h"
@@ -448,7 +449,7 @@ esp_err_t axp_set_current_charge(charge_current_t current){
  * @return esp_err_t 
  */
 esp_err_t axp_output_channel_enable(output_channel_t channel, bool enable){
-    return axp_write_bit(AXP173_DC1_LDO234_SW, channel, (enable?1:0));
+    return axp_write_bit(AXP173_DC1_LDO234_SW, channel, enable);
 }
 
 /**
@@ -638,7 +639,7 @@ esp_err_t axp_shutdown(uint8_t shutdown){
 }
 
 esp_err_t axp_autoShutdown_enable(bool enable){
-    return axp_write_bit(AXP173_PEK, 3, (enable ? 1 : 0));
+    return axp_write_bit(AXP173_PEK, 3, enable);
 }
 
 /**
@@ -828,13 +829,219 @@ esp_err_t axp_get_coulombCount_discharge(int32_t *discharge_count){
 
 
 
+/* IRQ 函数，未做测试 */
+
+/**
+ * @brief axp IRQ引脚中断处理函数，通知对应处理任务
+ * 
+ * @param arg 
+ */
+void IRAM_ATTR axp_isr_handler(void *arg){
+    //notify task to read
+    uint32_t a = 0;
+    xTaskNotifyFromISR(axpScanTask, 0, eNoAction, pdFALSE);
+}
 
 
-/* IRQ function */
-esp_err_t axp_IRQ_PIN_init(gpio_num_t PIN_IRQ);
-esp_err_t axp_IRQ_get_status(); //获取中断状态（读取的byte与默认byte对比，不一样再比bit，返回对应bit位）
-esp_err_t axp_IRQ_config();     //启动或屏蔽相应中断
+/**
+ * @brief 打印IRQ信息
+ * 
+ * @param reg       寄存器地址
+ * @param bitNum    bit位
+ */
+void axp_print_IRQ_status(uint8_t reg, uint8_t bitNum){
+    switch (reg) {
+    case AXP173_IRQ_STATUS_1:
+        switch (bitNum) {
+        case 7:
+            ESP_LOGI(TAG, "IRQ:ACIN 过压");
+            break;
+        case 6:
+            ESP_LOGI(TAG, "IRQ:ACIN 接入");
+            break;
+        case 5:
+            ESP_LOGI(TAG, "IRQ:ACIN 移出");
+            break;
+        case 4:
+            ESP_LOGI(TAG, "IRQ:VBUS 过压");
+            break;
+        case 3:
+            ESP_LOGI(TAG, "IRQ:VBUS 接入");
+            break;
+        case 2:
+            ESP_LOGI(TAG, "IRQ:VBUS 移出");
+            break;
+        case 1:
+            ESP_LOGI(TAG, "IRQ:VBUS 可用但小于 VHOLD");
+            break;
+        case 0:
+            ESP_LOGI(TAG, "保留");
+            break;
+        }
+        break;
+    case AXP173_IRQ_STATUS_2:
+        switch (bitNum) {
+        case 7:
+            ESP_LOGI(TAG, "IRQ:电池接入");
+            break;
+        case 6:
+            ESP_LOGI(TAG, "IRQ:电池移出");
+            break;
+        case 5:
+            ESP_LOGI(TAG, "IRQ:电池激活模式");
+            break;
+        case 4:
+            ESP_LOGI(TAG, "IRQ:退出电池激活模式");
+            break;
+        case 3:
+            ESP_LOGI(TAG, "IRQ:正在充电");
+            break;
+        case 2:
+            ESP_LOGI(TAG, "IRQ:充电完成");
+            break;
+        case 1:
+            ESP_LOGI(TAG, "IRQ:电池过温");
+            break;
+        case 0:
+            ESP_LOGI(TAG, "IRQ:电池低温");
+            break;
+        }
+        break;
+    case AXP173_IRQ_STATUS_3:
+        switch (bitNum) {
+        case 7:
+            ESP_LOGI(TAG, "IRQ:AXP173 内部过温 ");
+            break;
+        case 6:
+            ESP_LOGI(TAG, "IRQ:充电电流小于设置电流");
+            break;
+        case 5:
+            ESP_LOGI(TAG, "IRQ:DC-DC1 输出电压小于设置值");
+            break;
+        case 4:
+            ESP_LOGI(TAG, "IRQ:DC-DC2 输出电压小于设置值");
+            break;
+        case 3:
+            ESP_LOGI(TAG, "IRQ:LDO4 输出电压小于设置值 ");
+            break;
+        case 2:
+            ESP_LOGI(TAG, "保留");
+            break;
+        case 1:
+            ESP_LOGI(TAG, "IRQ:短按键");
+            break;
+        case 0:
+            ESP_LOGI(TAG, "长按键");
+            break;
+        }
+        break;
+    case AXP173_IRQ_STATUS_4:
+        switch (bitNum) {
+        case 7:
+            ESP_LOGI(TAG, "保留");
+            break;
+        case 6:
+            ESP_LOGI(TAG, "保留");
+            break;
+        case 5:
+            ESP_LOGI(TAG, "IRQ:VBUS 有效");
+            break;
+        case 4:
+            ESP_LOGI(TAG, "IRQ:VBUS 无效");
+            break;
+        case 3:
+            ESP_LOGI(TAG, "IRQ:VBUS Session A/B");
+            break;
+        case 2:
+            ESP_LOGI(TAG, "IRQ:VBUS Session End");
+            break;
+        case 1:
+            ESP_LOGI(TAG, "保留");
+            break;
+        case 0:
+            ESP_LOGI(TAG, "APS 低压 IRQ 状态, APS 电压低于 Warning Leve2 后置位, 超过 Warning Level1后将清 0");
+            break;
+        }
+        break;
+    }
+}
 
+
+/**
+ * @brief 一次扫描4个IRQ状态寄存器，并打印输出
+ * 
+ * @return esp_err_t 
+ */
+void axp_IRQ_scan_status(void){
+    uint8_t read_data[4];
+    axp_read_bytes(AXP173_IRQ_STATUS_1, read_data, 4);
+    
+    for(int i=0; i<=4; i++){
+        if(read_data[i] != 0){
+            for(int j = 0; j<=7; j++){
+                if(read_data[i]&(1<<j)){
+                    // def_reg = def_reg + i;
+                    // def_bitNum = j;
+                    // ret_code = ((read_data[i]<<8)|j);
+                    axp_print_IRQ_status(AXP173_IRQ_STATUS_1 + i, j);
+                }
+            }
+        }
+    }
+} //获取中断状态（读取的byte与默认byte对比，不一样再比bit，返回对应bit位）
+
+/**
+ * @brief IRQ使能
+ * 
+ * @param IRQcode   "AXP173_intr.h"中定义的宏，包含寄存器地址和对应bit位，见IRQ_...
+ * @param enable    是否使能
+ * @return esp_err_t 
+ */
+esp_err_t axp_IRQ_enable(uint16_t IRQcode, bool enable){
+    uint8_t bit_num = (IRQcode & 0xff);
+    uint8_t reg = ((IRQcode&0xff00) >> 8);
+    return axp_write_bit(reg, bit_num, enable);
+}     //启动或屏蔽相应中断
+
+/**
+ * @brief 配置相应引脚，并开启中断
+ * 
+ * @param pin_IRQ IRQ引脚
+ * @return esp_err_t 
+ */
+esp_err_t axp_isr_init(gpio_num_t pin_IRQ){
+    gpio_config_t conf = {
+        .intr_type = GPIO_INTR_NEGEDGE,
+        .mode = GPIO_MODE_INPUT,
+        .pin_bit_mask = (1ULL << pin_IRQ),
+        .pull_down_en = 0,
+        .pull_up_en = 0,
+    };
+    gpio_config(&conf);
+
+    gpio_install_isr_service(0);
+    gpio_isr_handler_add(pin_IRQ, axp_isr_handler, NULL);
+    
+    // 使用默认使能状态
+    // axp_IRQ_enable();
+}
+
+/**
+ * @brief axp IRQ 状态扫描函数
+ * 
+ * @param pvParameters 
+ */
+static void axpScanTask(void *pvParameters){
+    // 不在该任务内init
+    // axp_isr_init(AXP173_PIN_IRQ);
+    
+    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    axp_IRQ_scan_status();
+}
+
+void create_axp_IRQ_task(void){
+    xTaskCreatePinnedToCore(axpScanTask,"axpScanTask",4096,NULL,10,NULL, 0);
+}
 
 
 
@@ -846,9 +1053,9 @@ static esp_err_t axp_read_bytes(uint8_t reg, uint8_t *data, size_t len){
 static esp_err_t axp_read_byte(uint8_t reg, uint8_t *data){
     return i2c_bus_read_byte(axp.port, axp.addr, reg, data);
 }
-// static esp_err_t axp_read_bit(uint8_t reg, uint8_t bit_num, uint8_t *data){
-//     return i2c_bus_read_bit(axp.port, axp.addr, reg, bit_num, data);
-// }
+static esp_err_t axp_read_bit(uint8_t reg, uint8_t bit_num, uint8_t *data){
+    return i2c_bus_read_bit(axp.port, axp.addr, reg, bit_num, data);
+}
 
 /* axp173 i2c write */
 static esp_err_t axp_write_byte(uint8_t reg, const uint8_t data){

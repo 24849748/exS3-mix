@@ -10,6 +10,7 @@
 
 #define AXP173_I2C_ADDR         (0x34)      //axp173 i2c address
 
+#define AXP173_PIN_IRQ          39
 
 /* ================================================================= */
 
@@ -117,8 +118,10 @@ esp_err_t axp_get_coulombCount_charge(int32_t *charge_count);
 esp_err_t axp_get_coulombCount_discharge(int32_t *discharge_count);
 
 
-// IRQ
-
-
+// IRQ 未测试
+esp_err_t axp_isr_init(gpio_num_t pin_IRQ);
+esp_err_t axp_IRQ_enable(uint16_t IRQcode, bool enable);
+void axp_IRQ_scan_status(void);
+void create_axp_IRQ_task(void);
 
 #endif
