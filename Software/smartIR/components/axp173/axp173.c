@@ -459,6 +459,7 @@ esp_err_t axp_output_channel_enable(output_channel_t channel, bool enable){
  * @return esp_err_t 
  */
 esp_err_t axp_set_channel_volt(output_channel_t channel, float volt){
+    esp_err_t ret = ESP_OK;
     switch (channel) {
     case OUTPUT_CH_DC1:
         // if(volt < 0.7 || volt > 3.5 ){
@@ -467,21 +468,25 @@ esp_err_t axp_set_channel_volt(output_channel_t channel, float volt){
         // }
         // axp_write_byte(AXP173_DC1_VOLT, voltToBin_25mV(volt));
         // break;
-        axp_set_DC1_volt(volt);
+        ret = axp_set_DC1_volt(volt);
         break;
     case OUTPUT_CH_DC2:
-        axp_set_DC2_volt(volt);
+        ret = axp_set_DC2_volt(volt);
         break;
     case OUTPUT_CH_LDO2:
-        axp_set_LDO2_volt(volt);
+        ret = axp_set_LDO2_volt(volt);
         break;
     case OUTPUT_CH_LDO3:
-        axp_set_LDO3_volt(volt);
+        ret = axp_set_LDO3_volt(volt);
         break;
     case OUTPUT_CH_LDO4:
-        axp_set_LDO4_volt(volt);
+        ret = axp_set_LDO4_volt(volt);
+        break;
+    case OUTPUT_CH_EXTEN:
+        ret = ESP_OK;
         break;
     }
+    return ret;
 }
 
 /**
@@ -831,6 +836,7 @@ esp_err_t axp_get_coulombCount_discharge(int32_t *discharge_count){
 
 /* IRQ 函数，未做测试 */
 
+static void axpScanTask(void *pvParameters);
 /**
  * @brief axp IRQ引脚中断处理函数，通知对应处理任务
  * 
@@ -838,7 +844,7 @@ esp_err_t axp_get_coulombCount_discharge(int32_t *discharge_count){
  */
 void IRAM_ATTR axp_isr_handler(void *arg){
     //notify task to read
-    uint32_t a = 0;
+    // uint32_t a = 0;
     xTaskNotifyFromISR(axpScanTask, 0, eNoAction, pdFALSE);
 }
 
@@ -976,7 +982,7 @@ void axp_IRQ_scan_status(void){
     uint8_t read_data[4];
     axp_read_bytes(AXP173_IRQ_STATUS_1, read_data, 4);
     
-    for(int i=0; i<=4; i++){
+    for(int i=0; i<=3; i++){
         if(read_data[i] != 0){
             for(int j = 0; j<=7; j++){
                 if(read_data[i]&(1<<j)){
@@ -1009,7 +1015,7 @@ esp_err_t axp_IRQ_enable(uint16_t IRQcode, bool enable){
  * @param pin_IRQ IRQ引脚
  * @return esp_err_t 
  */
-esp_err_t axp_isr_init(gpio_num_t pin_IRQ){
+void axp_isr_init(gpio_num_t pin_IRQ){
     gpio_config_t conf = {
         .intr_type = GPIO_INTR_NEGEDGE,
         .mode = GPIO_MODE_INPUT,
@@ -1053,9 +1059,9 @@ static esp_err_t axp_read_bytes(uint8_t reg, uint8_t *data, size_t len){
 static esp_err_t axp_read_byte(uint8_t reg, uint8_t *data){
     return i2c_bus_read_byte(axp.port, axp.addr, reg, data);
 }
-static esp_err_t axp_read_bit(uint8_t reg, uint8_t bit_num, uint8_t *data){
-    return i2c_bus_read_bit(axp.port, axp.addr, reg, bit_num, data);
-}
+// static esp_err_t axp_read_bit(uint8_t reg, uint8_t bit_num, uint8_t *data){
+    // return i2c_bus_read_bit(axp.port, axp.addr, reg, bit_num, data);
+// }
 
 /* axp173 i2c write */
 static esp_err_t axp_write_byte(uint8_t reg, const uint8_t data){
