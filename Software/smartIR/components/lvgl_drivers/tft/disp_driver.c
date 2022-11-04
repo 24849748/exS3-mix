@@ -5,6 +5,7 @@
 
 #include "disp_driver.h"
 #include "disp_spi.h"
+#include "pwm_backlight.h"
 #include "st7789.h"
 #include <driver/spi_master.h>
 #include "driver_conf.h"
