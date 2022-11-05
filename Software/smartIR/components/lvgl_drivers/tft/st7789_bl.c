@@ -1,4 +1,4 @@
-#include "pwm_backlight.h"
+#include "st7789_bl.h"
 
 #include "driver/gpio.h"
 #include "driver/ledc.h"
@@ -11,17 +11,17 @@
 typedef struct {
     bool pwm_control; // true: LEDC is used, false: GPIO is used
     int index;        // Either GPIO or LEDC channel
-} pwm_backlight_t;
+} st7789_backlight_t;
 
 
-pwm_backlight_handle_t pwm_backlight_create(const pwm_backlight_config_t *config){
+st7789_backlight_handle_t pwm_backlight_create(const st7789_backlight_config_t *config){
     if(config == NULL) return NULL;
     if(!GPIO_IS_VALID_OUTPUT_GPIO(config->gpio_num)){
         ESP_LOGW(TAG, "Invalid GPIO");
         return NULL;
     }
 
-    pwm_backlight_t * bl_dev = calloc(1,sizeof(pwm_backlight_t));
+    st7789_backlight_t * bl_dev = calloc(1,sizeof(st7789_backlight_t));
     if(bl_dev == NULL){
         ESP_LOGW(TAG, "calloc backlight dev filed");
         return NULL;
@@ -56,15 +56,15 @@ pwm_backlight_handle_t pwm_backlight_create(const pwm_backlight_config_t *config
         gpio_matrix_out(config->gpio_num, SIG_GPIO_OUT_IDX, config->output_invert, false);
     }
 
-    return (pwm_backlight_handle_t)bl_dev;
+    return (st7789_backlight_handle_t)bl_dev;
 }
 
-void pwm_backlight_set(pwm_backlight_handle_t bl, int brightness_percent){
+void pwm_backlight_set(st7789_backlight_handle_t bl, int brightness_percent){
     if(bl == NULL) return;
     if(brightness_percent > 100) brightness_percent = 100;
     if(brightness_percent < 0) brightness_percent = 0;
 
-    pwm_backlight_t *bl_dev = (pwm_backlight_t *) bl;
+    st7789_backlight_t *bl_dev = (st7789_backlight_t *) bl;
     ESP_LOGI(TAG, "Setting LCD backlight: %d%%", brightness_percent);
 
     if(bl_dev->pwm_control){
@@ -76,11 +76,10 @@ void pwm_backlight_set(pwm_backlight_handle_t bl, int brightness_percent){
     }
 }
 
-void pwm_backlight_delete(pwm_backlight_handle_t bl)
-{
+void pwm_backlight_delete(st7789_backlight_handle_t bl) {
     if (bl == NULL) return;
 
-    pwm_backlight_t *bckl_dev = (pwm_backlight_t *) bl;
+    st7789_backlight_t *bckl_dev = (st7789_backlight_t *) bl;
     if (bckl_dev->pwm_control) {
         ledc_stop(LEDC_LOW_SPEED_MODE, bckl_dev->index, 0);
     } else {

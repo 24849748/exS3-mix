@@ -68,6 +68,11 @@
         "event_groups.h": "c",
         "esp_wifi_default.h": "c",
         "esp_wifi_private.h": "c",
-        "esp_event.h": "c"
+        "esp_event.h": "c",
+        "disp_driver.h": "c",
+        "st7789.h": "c",
+        "spi_bus.h": "c",
+        "disp_spi.h": "c",
+        "ledc_periph.h": "c"
     }
 }

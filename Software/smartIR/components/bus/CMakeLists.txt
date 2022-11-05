@@ -1,3 +1,3 @@
-idf_component_register(SRCS "i2c_bus.c"
+idf_component_register(SRCS "i2c_bus.c" "spi_bus.c"
                         INCLUDE_DIRS "."
                         REQUIRES driver)

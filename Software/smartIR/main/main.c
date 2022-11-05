@@ -9,6 +9,7 @@
 
 #include "led.h"
 #include "i2c_bus.h"
+#include "spi_bus.h"
 #include "lv_task.h"
 
 #include "wifi.h"
@@ -47,8 +48,11 @@ void rtos_debug(void){
 void app_main(void)
 {   
     // int count;
+    spi_bus_init(SPI_HOST);
     i2c_bus_init(I2C_NUM_0);
+    
 
+    // backlight init
 
     led_init(PIN_LED, 0);
     motor_init(PIN_MOTOR, 0);
@@ -57,10 +61,10 @@ void app_main(void)
     axp_init(I2C_NUM_0, AXP173_I2C_ADDR);
 
 
-    wifi_init();
-    wifi_start();
+    // wifi_init();
+    // wifi_start();
     // time_ntp_init();
-    time_ntp_get_time();
+    // time_ntp_get_time();
     
 
     lv_create_task();
@@ -70,7 +74,7 @@ void app_main(void)
     vTaskDelay(pdMS_TO_TICKS(200));
     motor_off(PIN_MOTOR);
 
-    rtos_debug();
+    // rtos_debug();
 }
 
 

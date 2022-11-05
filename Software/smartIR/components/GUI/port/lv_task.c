@@ -57,19 +57,23 @@ static void guiTask(void *pvParameter){
     ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
     ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, LV_TICK_PERIOD_MS * 1000));
     
-    //my gui
+    /* ========== GUI ============ */
+    //init
     bg_page();
     lv_init_btn_style();
     init_custom_btn_style();
 
+    //create obj
     main_page_create_obj();
     info_page_create_obj();
     ac_page_create_obj();
     fan_page_create_obj();
     ctrl_page_create_obj();
 
+    //first page
     main_page_anim_in(200);
-    
+    /* ============================ */
+
     while (1)
     {
         vTaskDelay(pdMS_TO_TICKS(10));
