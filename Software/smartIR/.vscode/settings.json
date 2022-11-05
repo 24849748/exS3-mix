@@ -51,6 +51,23 @@
         "esp_system.h": "c",
         "string": "c",
         "string_view": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "spi_master.h": "c",
+        "driver_conf.h": "c",
+        "esp_smartconfig.h": "c",
+        "future": "c",
+        "iomanip": "c",
+        "limits": "c",
+        "streambuf": "c",
+        "*.ipp": "c",
+        "ctime": "c",
+        "numeric": "c",
+        "esp_netif.h": "c",
+        "ntp.h": "c",
+        "esp_wifi.h": "c",
+        "event_groups.h": "c",
+        "esp_wifi_default.h": "c",
+        "esp_wifi_private.h": "c",
+        "esp_event.h": "c"
     }
 }

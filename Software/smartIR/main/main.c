@@ -11,14 +11,14 @@
 #include "i2c_bus.h"
 #include "lv_task.h"
 
+#include "wifi.h"
+#include "time_ntp.h"
 
 #include "axp173.h"
 #include "motor.h"
 
 #include "esp_log.h"
 #define TAG "main"
-
-// axp173_handle_t axp;
 
 /**
  * @brief   使用 vTaskList() debug 系统所有任务信息运行状态
@@ -47,30 +47,55 @@ void rtos_debug(void){
 void app_main(void)
 {   
     // int count;
+    i2c_bus_init(I2C_NUM_0);
+
+
     led_init(PIN_LED, 0);
     motor_init(PIN_MOTOR, 0);
 
-    i2c_bus_init(I2C_NUM_0);
+
     axp_init(I2C_NUM_0, AXP173_I2C_ADDR);
 
-    lv_create_task();
+
+    wifi_init();
+    wifi_start();
+    // time_ntp_init();
+    time_ntp_get_time();
     
+
+    lv_create_task();
+
 
     motor_on(PIN_MOTOR);
     vTaskDelay(pdMS_TO_TICKS(200));
     motor_off(PIN_MOTOR);
 
-
     rtos_debug();
 }
 
 
+/**
+ *  WiFi ：wifi:state wrong txa_flags=9
+ *  ntp get不到正确时间
+ */
+
+
+/** 启动流程 
+ *  1.初始化总线（spi、i2c）
+ *  2.初始化GPIO（led、motor）
+ *  3.初始化存储设备（nvs）
+ *  4.连接wifi
+ *  5.初始化 lv_port_disp、lv_port_indev（屏幕、输入设备）
+ *  6.lvgl_init
+ *  7.创建lvgl任务
+ *  8.创建其他任务
+ *  9.
+ *  10.
+ */
 
 
 /**
  * @todo
- *      使用 任务通知 使用LED和motor， motor要提示 充电完成、电池剩余电量不足等。。
- *      以GoButton写一个c的驱动
  *      
  */
 
