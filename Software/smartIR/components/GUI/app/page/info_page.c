@@ -7,6 +7,8 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 
+#include "motor.h"
+
 #include "esp_log.h"
 
 #define TAG "info_page"
@@ -246,6 +248,8 @@ void info_page_anim_out(uint32_t delay){
     anim_x_fade_out(sys_info_heap, 40, 100, delay+130);
 
     lv_timer_del(info_timer);
+
+    motor_click();
 }
 
 /*************************

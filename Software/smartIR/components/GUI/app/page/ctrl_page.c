@@ -106,6 +106,8 @@ void ctrl_page_anim_out(uint32_t delay){
     anim_y_fade_out(ctrl_return, CTRL_RETURN_Y, -50, delay);
     anim_x_fade_out(btn_led, 20, -100, delay);
     anim_x_fade_out(btn_motor, -20, 100, delay);
+
+    motor_click();
 }
 
 

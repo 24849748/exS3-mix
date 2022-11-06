@@ -6,6 +6,8 @@
 #include "anim.h"
 #include "lv_common.h"
 
+#include "motor.h"
+
 #include "esp_log.h"
 
 #define TAG "main_page"
@@ -250,6 +252,8 @@ void main_page_anim_out(uint32_t delay){
     anim_y_fade_out(btn_fan, 90, 190, delay);
     anim_y_fade_out(btn_info, 10, 190, delay);
     anim_y_fade_out(btn_ctrl, 90, 190, delay);
+
+    motor_click();
 }
 
 /*************************

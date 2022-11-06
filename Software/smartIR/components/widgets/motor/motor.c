@@ -1,7 +1,18 @@
 #include "motor.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/timers.h"
 #include "esp_log.h"
 
 #define TAG "motor"
+
+static TimerHandle_t motor_timer = NULL;
+
+#define MOTOR_CLICK_WORKTIME 80
+
+static void motor_timer_cb(TimerHandle_t xTimer){
+    gpio_set_level(PIN_MOTOR, 0);
+}
 
 esp_err_t motor_init(gpio_num_t pin, uint32_t level){
     gpio_config_t conf = {
@@ -22,6 +33,9 @@ esp_err_t motor_init(gpio_num_t pin, uint32_t level){
         ESP_LOGE(TAG, "motor set failed!");
         return ESP_FAIL;
     }
+
+    motor_timer = xTimerCreate("motor_click",(pdMS_TO_TICKS(MOTOR_CLICK_WORKTIME)), pdFALSE, NULL, motor_timer_cb);
+
     return ESP_OK;
 }
 
@@ -39,4 +53,11 @@ void motor_on(gpio_num_t pin){
 }
 void motor_off(gpio_num_t pin){
     gpio_set_level(pin, 0);
+}
+
+void motor_click(void){
+    if(!xTimerIsTimerActive(motor_timer)){
+        motor_on(PIN_MOTOR);
+        xTimerStart(motor_timer, 0);
+    }
 }

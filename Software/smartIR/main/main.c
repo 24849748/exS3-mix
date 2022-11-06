@@ -100,7 +100,8 @@ void app_main(void)
 
 /**
  * @todo
- *      
+ *      使用pwm backlight
+ *  
  */
 
 

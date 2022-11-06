@@ -13,4 +13,6 @@ void motor_reverse(gpio_num_t pin);
 void motor_set(gpio_num_t pin, uint32_t level);
 
 
+void motor_click(void);
+
 #endif
