@@ -107,7 +107,7 @@ void ctrl_page_anim_out(uint32_t delay){
     anim_x_fade_out(btn_led, 20, -100, delay);
     anim_x_fade_out(btn_motor, -20, 100, delay);
 
-    motor_click();
+    motor_click(DEFAULT_MOTOR_CLICK_WORKTIME);
 }
 
 

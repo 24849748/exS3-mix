@@ -249,7 +249,7 @@ void info_page_anim_out(uint32_t delay){
 
     lv_timer_del(info_timer);
 
-    motor_click();
+    motor_click(DEFAULT_MOTOR_CLICK_WORKTIME);
 }
 
 /*************************

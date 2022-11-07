@@ -50,7 +50,7 @@ static void ac_switch_cb(lv_event_t *e){
         }
         acswitch = !acswitch;
     }
-    motor_click();
+    motor_click(DEFAULT_MOTOR_CLICK_WORKTIME);
 }
 static void ac_arc_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
@@ -71,7 +71,7 @@ static void ac_add_cb(lv_event_t *e){
         lv_label_set_text_fmt(text_temp, "#88B2FB %d°", acTemperature);
         ESP_LOGI(TAG, "ac temp add: %d",lv_arc_get_value(ac_arc));
     }
-    motor_click();
+    motor_click(DEFAULT_MOTOR_CLICK_WORKTIME);
 }
 static void ac_cut_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
@@ -84,7 +84,7 @@ static void ac_cut_cb(lv_event_t *e){
         lv_label_set_text_fmt(text_temp, "#88B2FB %d°", acTemperature);
         ESP_LOGI(TAG, "ac temp cut: %d",lv_arc_get_value(ac_arc));
     }
-    motor_click();
+    motor_click(DEFAULT_MOTOR_CLICK_WORKTIME);
 }
 
 
@@ -268,7 +268,7 @@ void ac_page_anim_out(uint32_t delay){
     anim_x_fade_out(ac_timing, -50, -100, delay);
     anim_x_fade_out(ac_speed, 50, 100, delay);
 
-    motor_click();
+    motor_click(DEFAULT_MOTOR_CLICK_WORKTIME);
 }
 
 

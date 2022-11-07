@@ -253,7 +253,7 @@ void main_page_anim_out(uint32_t delay){
     anim_y_fade_out(btn_info, 10, 190, delay);
     anim_y_fade_out(btn_ctrl, 90, 190, delay);
 
-    motor_click();
+    motor_click(DEFAULT_MOTOR_CLICK_WORKTIME);
 }
 
 /*************************

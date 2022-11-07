@@ -49,7 +49,7 @@ static void fan_switch_cb(lv_event_t *e){
         }
         fanswitch = !fanswitch;
     }
-    motor_click();
+    motor_click(DEFAULT_MOTOR_CLICK_WORKTIME);
 }
 
 
@@ -58,28 +58,28 @@ static void fan_class_cb(lv_event_t *e){
     if(code == LV_EVENT_CLICKED) {
         ESP_LOGI(TAG, "fan: class");
     }
-    motor_click();
+    motor_click(DEFAULT_MOTOR_CLICK_WORKTIME);
 }
 static void fan_wet_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
         ESP_LOGI(TAG, "fan: wet");
     }
-    motor_click();
+    motor_click(DEFAULT_MOTOR_CLICK_WORKTIME);
 }
 static void fan_swing_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
         ESP_LOGI(TAG, "fan: swing");
     }
-    motor_click();
+    motor_click(DEFAULT_MOTOR_CLICK_WORKTIME);
 }
 static void fan_speed_cb(lv_event_t *e){
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_CLICKED) {
         ESP_LOGI(TAG, "fan: speed");
     }
-    motor_click();
+    motor_click(DEFAULT_MOTOR_CLICK_WORKTIME);
 }
 
 
@@ -240,7 +240,7 @@ void fan_page_anim_out(uint32_t delay){
     anim_step_out(fan_speed, 200);
 
 
-    motor_click();
+    motor_click(DEFAULT_MOTOR_CLICK_WORKTIME);
 }
 
 
