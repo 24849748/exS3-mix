@@ -1,3 +1,3 @@
-idf_component_register(SRCS "sd_spi_fatfs.c"
+idf_component_register(SRCS "mNVS.c" "sd_card.c"
                         INCLUDE_DIRS "."
-                        REQUIRES driver fatfs)
+                        REQUIRES driver fatfs nvs_flash)
