@@ -73,6 +73,9 @@
         "st7789.h": "c",
         "spi_bus.h": "c",
         "disp_spi.h": "c",
-        "ledc_periph.h": "c"
+        "ledc_periph.h": "c",
+        "nvs_flash.h": "c",
+        "led.h": "c",
+        "timers.h": "c"
     }
 }
