@@ -334,15 +334,16 @@ void st7789_init(void){
     gpio_pad_select_gpio(ST7789_PIN_DC);
     gpio_set_direction(ST7789_PIN_DC, GPIO_MODE_OUTPUT);
 
-    gpio_pad_select_gpio(ST7789_PIN_BLK);
-    gpio_set_direction(ST7789_PIN_BLK, GPIO_MODE_OUTPUT);
+    //背光初始化在encoder组件中
+    // gpio_pad_select_gpio(ST7789_PIN_BLK);
+    // gpio_set_direction(ST7789_PIN_BLK, GPIO_MODE_OUTPUT);
 
 #if !defined(ST7789_SOFT_RST)
     gpio_pad_select_gpio(ST7789_PIN_RST);
     gpio_set_direction(ST7789_PIN_RST, GPIO_MODE_OUTPUT);
 #endif
 
-    st7789_enable_backlight(false);
+    // st7789_enable_backlight(false);
     
     //Reset the display
 #if defined(ST7789_SOFT_RST)
@@ -368,7 +369,7 @@ void st7789_init(void){
     }
 
     st7789_set_orientation(ST7789_ORIENTATION);
-    st7789_enable_backlight(true);
+    // st7789_enable_backlight(true);
 }
 
 

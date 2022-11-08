@@ -76,6 +76,9 @@
         "ledc_periph.h": "c",
         "nvs_flash.h": "c",
         "led.h": "c",
-        "timers.h": "c"
+        "timers.h": "c",
+        "gpio.h": "c",
+        "encoder_button.h": "c",
+        "pwm_bl.h": "c"
     }
 }

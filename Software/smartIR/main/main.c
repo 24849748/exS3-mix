@@ -17,6 +17,8 @@
 
 #include "axp173.h"
 #include "motor.h"
+// #include "encoder_button.h"
+#include "encoder.h"
 
 #include "esp_log.h"
 #define TAG "main"
@@ -56,11 +58,13 @@ void app_main(void)
 
     led_init(PIN_LED, 0);
     motor_init(PIN_MOTOR, 0);
-
+    
 
     axp_init(I2C_NUM_0, AXP173_I2C_ADDR);
+    // encoder_btn_init();
+    encoder_init();
 
-
+    
     // wifi_init();
     // wifi_start();
     // time_ntp_init();
@@ -68,7 +72,8 @@ void app_main(void)
     
 
     lv_create_task();
-
+    // create_encoder_button_task();
+    create_encoder_task();
 
     motor_on(PIN_MOTOR);
     vTaskDelay(pdMS_TO_TICKS(200));
