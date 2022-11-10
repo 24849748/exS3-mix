@@ -11,6 +11,7 @@
 #include "button.h"
 #include "pwm_bl.h"
 #include "led.h"
+#include "ft6236.h"
 
 #include "widgets_conf.h"
 #include "sdkconfig.h"      
@@ -29,11 +30,13 @@ encoder_handle_t ecd;               /* encoder 设备句柄 */
 
 void encoder_open_lcd(void){
     pwm_bl_set(brightness);
+    ft6236_enable_read();
     encoder_start(ecd);
     led_endBlink();
 }
 void encoder_close_lcd(void){
     encoder_stop(ecd);
+    ft6236_disable_read();
     pwm_bl_set(0);
     led_startBlink();
 }
@@ -51,7 +54,6 @@ void encoder_init(void){
     encoder_start(ecd);         //开启encoder pcnt
 
     last_count = encoder_get_counter_value(ecd);    //获取初值
-
 
     pwm_bl_init(CONFIG_PIN_ST7789_BLK, false, true);
     pwm_bl_set(brightness);

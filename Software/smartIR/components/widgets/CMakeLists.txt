@@ -19,4 +19,4 @@ idf_component_register(
         ${WIDGET_ROOT_DIR}/encoder
         ${WIDGET_ROOT_DIR}/button
     REQUIRES 
-        driver lvgl)
+        driver lvgl lvgl_drivers)

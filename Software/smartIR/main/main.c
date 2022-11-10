@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// #include "sdkconfig.h"
+#include "sdkconfig.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -19,6 +19,8 @@
 #include "motor.h"
 // #include "encoder_button.h"
 #include "encoder.h"
+// #include "ecd.h"
+
 
 #include "esp_log.h"
 #define TAG "main"
@@ -58,13 +60,14 @@ void app_main(void)
 
     led_init(PIN_LED, 0);
     motor_init(PIN_MOTOR, 0);
-    
+    // ecd_init(CONFIG_PIN_ECD_B, CONFIG_PIN_ECD_A, 1);
 
     axp_init(I2C_NUM_0, AXP173_I2C_ADDR);
     // encoder_btn_init();
+    
     encoder_init();
 
-    
+
     // wifi_init();
     // wifi_start();
     // time_ntp_init();
@@ -73,6 +76,7 @@ void app_main(void)
 
     lv_create_task();
     // create_encoder_button_task();
+
     create_encoder_task();
 
     motor_on(PIN_MOTOR);
@@ -91,7 +95,7 @@ void app_main(void)
 
 /** 启动流程 
  *  1.初始化总线（spi、i2c）
- *  2.初始化GPIO（led、motor）
+ *  2.初始化GPIO（led、motor、button、encoder）
  *  3.初始化存储设备（nvs）
  *  4.连接wifi
  *  5.初始化 lv_port_disp、lv_port_indev（屏幕、输入设备）
@@ -105,8 +109,7 @@ void app_main(void)
 
 /**
  * @todo
- *      使用pwm backlight
- *  
+ *      sd卡 相册
  */
 
 

@@ -9,6 +9,15 @@
 static ft6236_t ft6236;
 static ft6x36_touch_t touch_inputs = { -1, -1, LV_INDEV_STATE_REL };    // -1 coordinates to designate it was never touched
 
+bool touch_enable = true;
+
+void ft6236_enable_read(void){
+    touch_enable = true;
+}
+void ft6236_disable_read(void){
+    touch_enable = false;
+}
+
 
 /**
  * @brief ft6236读取寄存器数据，使用前必须先运行 ft6236_init() 函数
@@ -74,6 +83,15 @@ void ft6236_read(lv_indev_drv_t *drv, lv_indev_data_t *data){
         ESP_LOGE(TAG, "Init first!");
         return;
     }
+
+    if(!touch_enable){
+        data->point.x = -1;
+        data->point.y = -1;
+        data->state = LV_INDEV_STATE_REL;
+
+        return;
+    }
+
     uint8_t data_buf[5];        // 1 byte status, 2 bytes X, 2 bytes Y
     esp_err_t ret = i2c_bus_read_bytes(ft6236.port, ft6236.addr,FT6X36_TD_STAT_REG, &data_buf[0],5);
     if(ret != ESP_OK){

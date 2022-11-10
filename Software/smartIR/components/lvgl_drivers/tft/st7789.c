@@ -51,7 +51,6 @@ typedef struct {
 } lcd_init_cmd_t;
 
 
-
 // static spi_host_device_t spi_host;
 // static transaction_cb_t chained_post_cb;
 static spi_device_handle_t st7789_spi_handle;
