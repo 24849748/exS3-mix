@@ -215,6 +215,12 @@ menu "exS3"
                 default 8000000 if LCD_CLK_SPEED_8
                 default 1000000 if LCD_CLK_SPEED_1
                 default 40000000
+
+            config LCD_DEFAULT_BRIGHTNESS
+                int "Default brightness"
+                range 5 95
+            
+                
         endmenu
 
         menu "Touch"

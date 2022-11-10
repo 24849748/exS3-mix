@@ -7,39 +7,44 @@
 
 #include "driver/pcnt.h"
 #include "rot_enc.h"
-#include "encoder_button.h"
+// #include "encoder_button.h"
+#include "button.h"
 #include "pwm_bl.h"
+#include "led.h"
 
 #include "widgets_conf.h"
-#include "sdkconfig.h"
+#include "sdkconfig.h"      
 
 #define TAG "encoder"
 
-#define ECD_DEBUG 1     //开启debug 输出
+#define ECD_DEBUG 1                 //开启debug 输出
 
-
-static int32_t last_count;  /* 最后一次计数 */
+static int32_t last_count;          /* 最后一次计数 */
 static int32_t encoder_diff = 0;    /* 编码器转动方向 1-cw, -1-ccw, 0-default */
-static SemaphoreHandle_t encoder_mutex;     //encoder读写保护
 
-int8_t last_brightness = 0;
-int8_t brightness = 50;
+int8_t last_brightness = 0;         // 避免重复设置亮度
+int8_t brightness = 50;             // 亮度
 
-encoder_handle_t ecd;   /* encoder 设备句柄 */
+encoder_handle_t ecd;               /* encoder 设备句柄 */
 
-static pwm_bl_handle_t pwm_bl_handle;
-
-
+void encoder_open_lcd(void){
+    pwm_bl_set(brightness);
+    encoder_start(ecd);
+    led_endBlink();
+}
+void encoder_close_lcd(void){
+    encoder_stop(ecd);
+    pwm_bl_set(0);
+    led_startBlink();
+}
 
 void encoder_init(void){    
-    // uint32_t pcnt_unit = 0;
-    encoder_mutex = xSemaphoreCreateMutex();    //创建mutex;
-
     //编码器按键初始化
-    encoder_btn_init();
+    button_init(encoder_open_lcd, encoder_close_lcd);
 
     //创建编码器句柄
-    ecd = encoder_create(ECD_PCNT_UNIT_NUM, PIN_ECD_A, PIN_ECD_B);
+    // ecd = encoder_create(ECD_PCNT_UNIT_NUM, PIN_ECD_A, PIN_ECD_B);
+    ecd = encoder_create(ECD_PCNT_UNIT_NUM, CONFIG_PIN_ECD_A, CONFIG_PIN_ECD_B);
     
     //设置去抖值，1us
     encoder_set_glitch_fliter(ecd, 1);          //设置过滤
@@ -47,15 +52,9 @@ void encoder_init(void){
 
     last_count = encoder_get_counter_value(ecd);    //获取初值
 
-    pwm_bl_config_t bl_conf = {
-        .gpio_num = CONFIG_PIN_ST7789_BLK,
-        .output_invert = false,
-        .pwm_control = true,
-        .timer_idx = 0,
-        .channel_idx = 0,
-    };
-    pwm_bl_handle = pwm_bl_create(&bl_conf);
-    pwm_bl_set(pwm_bl_handle, brightness);
+
+    pwm_bl_init(CONFIG_PIN_ST7789_BLK, false, true);
+    pwm_bl_set(brightness);
 }
 
 
@@ -66,42 +65,33 @@ static void encoder_task(void *pvParameter){
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(100));
 
-        // if(pdTRUE == xSemaphoreTake(encoder_mutex, portMAX_DELAY)){
-            
-            encoder_btn_scan();
+        button_scan();
 
-            // int32_t dir = 0;
-            int32_t count = encoder_get_counter_value(ecd);
-            // ESP_LOGI(TAG, "count:%d",count);
-            // if(count > 100) count = 100;
-            // if(count < 0) count = 0;
+        // int32_t dir = 0;
+        int32_t count = encoder_get_counter_value(ecd);
+        // ESP_LOGI(TAG, "count:%d",count);
+        // if(count > 100) count = 100;
+        // if(count < 0) count = 0;
 
-            if(count - last_count < 0){
-                encoder_diff = -1;
-                brightness -= 5;
-            }else if(count - last_count > 0){
-                encoder_diff = 1;
-                brightness += 5;
-            }else if(count == last_count){
-                encoder_diff = 0;
-            }
-            last_count = count;
-            ESP_LOGI(TAG, "diff:%d", encoder_diff);
+        if(count - last_count < 0){
+            encoder_diff = -1;
+            brightness -= 5;
+        }else if(count - last_count > 0){
+            encoder_diff = 1;
+            brightness += 5;
+        }else if(count == last_count){
+            encoder_diff = 0;
+        }
+        last_count = count;
+        // ESP_LOGI(TAG, "diff:%d", encoder_diff);
 
+        if(brightness > 100) brightness = 100;
+        if(brightness < 5) brightness = 5;
 
-            if(brightness > 100) brightness = 100;
-            if(brightness < 5) brightness = 5;
-
-            if(brightness != last_brightness){
-                pwm_bl_set(pwm_bl_handle, brightness);
-                last_brightness = brightness;
-            }
-
-            
-
-        // }
-        // xSemaphoreGive(encoder_mutex);
-
+        if(brightness != last_brightness){
+            pwm_bl_set(brightness);
+            last_brightness = brightness;
+        }
     }
     // encoder_delete(ecd);
 }
@@ -110,3 +100,9 @@ void create_encoder_task(void){
     xTaskCreatePinnedToCore(encoder_task, "encoderTask", 2048, NULL, 4, NULL, 1);
 }
 
+
+/**
+ * @todo 
+ *      使用nvs存储亮度（或没必要）
+ * 
+ */

@@ -1,7 +1,15 @@
 #include "led.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/timers.h"
 #include "esp_log.h"
 
 #define TAG "led"
+
+static TimerHandle_t led_timer = NULL;
+
+static void led_timer_cb(TimerHandle_t xTimer){
+    led_blink(PIN_LED);
+}
 
 
 /**
@@ -30,6 +38,9 @@ esp_err_t led_init(gpio_num_t pin, uint32_t default_level){
         ESP_LOGE(TAG, "led set failed!");
         return ESP_FAIL;
     }
+
+    led_timer = xTimerCreate("led_blink", (pdMS_TO_TICKS(1500)), pdTRUE, NULL, led_timer_cb);
+
     return ESP_OK;
 }
 
@@ -56,3 +67,11 @@ void led_off(gpio_num_t pin){
 }
 
 
+void led_startBlink(void){
+    xTimerStart(led_timer, 0);
+}
+
+void led_endBlink(void){
+    xTimerStop(led_timer, 0);
+    led_off(PIN_LED);
+}

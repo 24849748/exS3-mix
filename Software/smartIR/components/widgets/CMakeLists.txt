@@ -5,6 +5,7 @@ file(GLOB_RECURSE SOURCES
         ${WIDGET_ROOT_DIR}/led/*.c
         ${WIDGET_ROOT_DIR}/motor/*.c
         ${WIDGET_ROOT_DIR}/encoder/*.c
+        ${WIDGET_ROOT_DIR}/button/*.c
         )
 
 
@@ -16,5 +17,6 @@ idf_component_register(
         ${WIDGET_ROOT_DIR}/led
         ${WIDGET_ROOT_DIR}/motor
         ${WIDGET_ROOT_DIR}/encoder
+        ${WIDGET_ROOT_DIR}/button
     REQUIRES 
         driver lvgl)
