@@ -110,6 +110,7 @@ void app_main(void)
 /**
  * @todo
  *      sd卡 相册
+ *      开机加载界面
  */
 
 

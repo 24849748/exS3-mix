@@ -25,6 +25,7 @@
 #include "ac_page.h"
 #include "info_page.h"
 #include "ctrl_page.h"
+#include "start_page.h"
 #include "lv_common.h"
 
 #define TAG "lv_task"
@@ -71,7 +72,8 @@ static void guiTask(void *pvParameter){
     ctrl_page_create_obj();
 
     //first page
-    main_page_anim_in(200);
+    // main_page_anim_in(200);
+    start_page();
     /* ============================ */
 
     while (1)
