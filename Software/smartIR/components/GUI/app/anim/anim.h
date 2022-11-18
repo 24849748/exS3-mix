@@ -24,4 +24,8 @@ void anim_y_fade_out(lv_obj_t *obj, int32_t start, int32_t end, uint32_t delay);
 void anim_step_in(lv_obj_t *obj, uint32_t delay);
 void anim_step_out(lv_obj_t *obj, uint32_t delay);
 
+void anim_y_liner_in(lv_obj_t *obj, int32_t start, int32_t end, uint32_t delay);
+void anim_y_liner_out(lv_obj_t *obj, int32_t start, int32_t end, uint32_t delay);
+
+
 #endif
