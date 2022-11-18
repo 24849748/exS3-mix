@@ -27,17 +27,20 @@
 #include "ctrl_page.h"
 #include "start_page.h"
 #include "lv_common.h"
+#include "notify_bar.h"
 
 #define TAG "lv_task"
 #define LV_TICK_PERIOD_MS 1
 
+TaskHandle_t GuiTaskHandle;
 SemaphoreHandle_t xGuiMutex;
 
 static void lv_tick_task(void *arg){
     (void)arg;
     lv_tick_inc(LV_TICK_PERIOD_MS);
 }
-static void guiTask(void *pvParameter){
+
+void guiTask(void *pvParameter){
     (void)pvParameter;
     xGuiMutex = xSemaphoreCreateMutex();
     //lvgl init
@@ -70,9 +73,11 @@ static void guiTask(void *pvParameter){
     ac_page_create_obj();
     fan_page_create_obj();
     ctrl_page_create_obj();
-
+    create_brightnessBar();
+    
     //first page
     // main_page_anim_in(200);
+    create_notify_timer();
     start_page();
     /* ============================ */
 
@@ -85,8 +90,4 @@ static void guiTask(void *pvParameter){
         }
     }
     vTaskDelete(NULL);
-}
-
-void lv_create_task(void){ 
-    xTaskCreatePinnedToCore(guiTask, "gui", 4096 * 2, NULL, 0, NULL, 1);
 }

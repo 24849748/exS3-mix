@@ -4,7 +4,6 @@
 
 #include "lvgl.h"
 
-
-void lv_create_task(void);
+void guiTask(void *pvParameter);
 
 #endif
