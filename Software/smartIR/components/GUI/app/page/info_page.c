@@ -45,7 +45,7 @@ static void return_mainpage_cb(lv_event_t *e){
     if(code == LV_EVENT_CLICKED) {
         ESP_LOGI(TAG, "return main page");
         info_page_anim_out(200);
-        main_page_anim_in(200);
+        main_page_anim_in(330);
     }
 }
 
