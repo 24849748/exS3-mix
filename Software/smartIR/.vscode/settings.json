@@ -79,6 +79,8 @@
         "timers.h": "c",
         "gpio.h": "c",
         "encoder_button.h": "c",
-        "pwm_bl.h": "c"
+        "pwm_bl.h": "c",
+        "rot_enc.h": "c",
+        "task.h": "c"
     }
 }

@@ -25,6 +25,8 @@
 #include "esp_log.h"
 #define TAG "main"
 
+TaskHandle_t GuiTaskHandle;
+
 /**
  * @brief   使用 vTaskList() debug 系统所有任务信息运行状态
  *      State说明
@@ -74,11 +76,12 @@ void app_main(void)
     // time_ntp_get_time();
     
 
-    lv_create_task();
-    // create_encoder_button_task();
+    // lv_create_task();    
+    xTaskCreatePinnedToCore(guiTask, "gui", 4096 * 2, NULL, 0, &    GuiTaskHandle, 1);
 
-    create_encoder_task();
-
+    // create_encoder_task();
+    xTaskCreatePinnedToCore(encoder_task, "encoderTask", 4096, (void *)GuiTaskHandle, 4, NULL, 1);
+    
     motor_on(PIN_MOTOR);
     vTaskDelay(pdMS_TO_TICKS(200));
     motor_off(PIN_MOTOR);
@@ -111,6 +114,7 @@ void app_main(void)
  * @todo
  *      sd卡 相册
  *      开机加载界面
+ *      屏幕亮度调节显示组件
  */
 
 
