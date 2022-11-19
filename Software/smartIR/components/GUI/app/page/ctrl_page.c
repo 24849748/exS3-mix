@@ -54,14 +54,7 @@ static void btn_motor_cb(lv_event_t *e){
 /* info 页面返回按键 */
 void create_ctrl_return_btn(void){
     /* 返回键 */
-    ctrl_return = lv_img_create(bg_screen);
-    lv_obj_set_style_translate_y(ctrl_return, 5, LV_STATE_PRESSED);
-    lv_obj_align(ctrl_return, LV_ALIGN_TOP_LEFT, 10, CTRL_RETURN_Y);
-    lv_obj_add_flag(ctrl_return, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(ctrl_return, return_mainpage_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_ext_click_area(ctrl_return, 15);
-    LV_IMG_DECLARE(logo_return);        //使用返回图片
-    lv_img_set_src(ctrl_return, &logo_return); 
+    ctrl_return = create_return_button(return_mainpage_cb);
 }
 
 void create_ctrl_page_btn(void){

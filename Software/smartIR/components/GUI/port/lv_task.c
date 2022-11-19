@@ -64,7 +64,6 @@ void guiTask(void *pvParameter){
     /* ========== GUI ============ */
     //init
     bg_page();
-    lv_init_btn_style();
     init_custom_btn_style();
 
     //create obj

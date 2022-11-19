@@ -58,14 +58,7 @@ static void return_mainpage_cb(lv_event_t *e){
 /* info 页面返回按键 */
 void create_info_return_btn(void){
     /* 返回键 */
-    info_return = lv_img_create(bg_screen);
-    lv_obj_set_style_translate_y(info_return, 5, LV_STATE_PRESSED);
-    lv_obj_align(info_return, LV_ALIGN_TOP_LEFT, 10, INFO_RETURN_Y);
-    lv_obj_add_flag(info_return, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(info_return, return_mainpage_cb, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_ext_click_area(info_return, 15);
-    LV_IMG_DECLARE(logo_return);        //使用返回图片
-    lv_img_set_src(info_return, &logo_return); 
+    info_return = create_return_button(return_mainpage_cb);
 }
 
 /* info左边线条 */
@@ -93,7 +86,7 @@ lv_obj_t * lv_create_info_label(lv_obj_t *parent, lv_coord_t y){
     // lv_label_set_text(obj, text);
     lv_label_set_recolor(obj,true);
     lv_obj_align(obj, LV_ALIGN_TOP_LEFT, INFO_LINE_X+10, y);
-    lv_obj_add_style(obj, &style_font, 0);
+    lv_obj_set_style_text_color(obj, lv_color_white(), 0);
     return obj;
 }
 
