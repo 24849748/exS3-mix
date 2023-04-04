@@ -1,0 +1,3 @@
+[submodule "Software/exS3"]
+	path = Software/exS3
+	url = https://github.com/24849748/exS3.git
